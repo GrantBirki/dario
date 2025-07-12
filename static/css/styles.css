@@ -48,7 +48,7 @@ body,
 }
 
 html {
-  visibility: hidden;
+  visibility: var(--preload-visibility);
 }
 
 html.js-loaded {
