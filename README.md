@@ -109,12 +109,12 @@ theme = "dario"
 
 To add intro text to your home page, create a file at `content/_intro.md` with contents similar to the following:
 
-```toml
-+++
-headless = true
-title = "Home Page Text" # the text to display on the "/" homepage
-description = "A minimal web log." # The description of the home page that will be used in the open graph meta tags
-+++
+```yaml
+---
+headless: true
+title: "Home Page Text" # the text to display on the "/" homepage
+description: "A minimal web log." # The description of the home page that will be used in the open graph meta tags
+---
 
 This is a minimal web log inspired by Dario Amodei's personal [website](https://darioamodei.com/). Add some more text here that will be displayed on your homepage (you can use markdown).
 ```
