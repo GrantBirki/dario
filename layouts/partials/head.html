@@ -18,6 +18,9 @@
     <link rel="preload" href="{{ "fonts/Newsreader-italic.woff2" | relURL }}" as="font" type="font/woff2" crossorigin />
 
     <link rel="stylesheet" href="{{ "css/styles.css" | relURL }}" />
+    {{- with resources.Get "css/custom.css" }}
+    <link rel="stylesheet" href="{{ .RelPermalink }}" />
+    {{- end }}
 
     <link rel="icon" type="image/x-icon" href="{{ "favicon.ico" | relURL }}" />
     <link rel="apple-touch-icon" href="{{ "apple-touch-icon.png" | relURL }}" />
