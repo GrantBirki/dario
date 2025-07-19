@@ -1,6 +1,11 @@
 {{ define "main" }}
     <section>
+        {{- with .Site.GetPage "_404.md" }}
+        <h1 class="smaller">{{ .Params.subtitle }}</h1>
+        {{ .Content }}
+        {{- else }}
         <h1 class="smaller">404</h1>
-        <p>Not found.</p>
+        <p>Page not found.</p>
+        {{- end }}
     </section>
 {{ end }}
