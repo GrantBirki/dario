@@ -1,5 +1,9 @@
 <footer>
     <div class="footer-content">
+        {{- with .Site.Copyright }}
+        <p>{{ . }}</p>
+        {{- else }}
         <p>&copy; {{ now.Year }} {{ .Site.Title }}</p>
+        {{- end }}
     </div>
 </footer>
