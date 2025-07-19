@@ -6,7 +6,7 @@
     </section>
     {{- end }}
 
-    {{ range sort (where .Site.Sections "Weight" "ne" -1) "Weight" }}
+    {{ range sort (where .Site.Sections "Section" "in" .Site.MainSections) "Weight" }}
     <section>
     <h2>{{ .Title }}</h2>
     <ul>

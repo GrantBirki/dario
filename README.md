@@ -128,6 +128,12 @@ By default, the theme shows a toggle for switching between light and dark modes.
   useSystemColorScheme = true
 ```
 
+The home page shows the top-level section with the most pages by default. To override this, set `mainSections` to select specific sections:
+
+```toml
+mainSections = ['posts', 'essays', 'notes']
+```
+
 ## Blog Posts
 
 Creating a blog post follows the same general process as most Hugo blogging themes.
