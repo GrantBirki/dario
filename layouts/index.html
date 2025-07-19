@@ -1,9 +1,12 @@
 {{ define "main" }}
-    {{- with .Site.GetPage "_intro.md" }}
-    <section>
-    <h1 class="smaller">{{ .Params.title }}</h1>
-    {{ .Content }}
-    </section>
+    {{- with .Site.GetPage "_index.md" }}
+        {{- $subtitle := .Params.subtitle }}
+        {{- with .Content }}
+        <section>
+        <h1 class="smaller">{{ $subtitle }}</h1>
+        {{ . }}
+        </section>
+        {{- end }}
     {{- end }}
 
     {{ range sort (where .Site.Sections "Weight" "ne" -1) "Weight" }}

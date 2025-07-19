@@ -107,14 +107,13 @@ theme = "dario"
   description = "A description of your site" # a description of your site that will be used in the meta tags
 ```
 
-To add intro text to your home page, create a file at `content/_intro.md` with contents similar to the following:
+To add intro text to your home page, create a file at `content/_index.md` with contents similar to the following:
 
-```toml
-+++
-headless = true
-title = "Home Page Text" # the text to display on the "/" homepage
-description = "A minimal web log." # The description of the home page that will be used in the open graph meta tags
-+++
+```yaml
+---
+subtitle: "Home Page Subtitle" # the subtitle to display on the "/" homepage
+description: "A minimal web log." # The description of the home page that will be used in the open graph meta tags
+---
 
 This is a minimal web log inspired by Dario Amodei's personal [website](https://darioamodei.com/). Add some more text here that will be displayed on your homepage (you can use markdown).
 ```
