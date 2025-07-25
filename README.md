@@ -128,12 +128,14 @@ This is a minimal web log inspired by Dario Amodei's personal [website](https://
 
 ### Optional Settings
 
-By default, the theme shows a toggle for switching between light and dark modes. To follow the user's system preference instead, set the `useSystemColorScheme` parameter:
+By default, the theme shows a toggle for switching between light and dark modes. To follow the user's system preference instead, set the `colorScheme` parameter to `'system'`:
 
 ```toml
 [params]
-  useSystemColorScheme = true
+  colorScheme = 'system'
 ```
+
+You can also set it to `'light'` or `'dark'` to keep it fixed.
 
 The home page shows the top-level section with the most pages by default. To override this, set `mainSections` to select specific sections:
 
