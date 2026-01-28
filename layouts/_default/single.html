@@ -1,5 +1,5 @@
 {{- define "main" }}
-    <h1>{{ .Title }}</h1>
+    <h1>{{ .Title | markdownify }}</h1>
     <h4>{{ .Params.description }}</h4>
 
     {{- if isset .Params "date" }}
