@@ -8,8 +8,7 @@
 
     {{- $page := partial "objects/page.html" . }}
     <meta name="description" content="{{- $page.description -}}">
-
-    <title>{{ $page.title | markdownify | plainify }}</title>
+    <title>{{ $page.title }}</title>
 
     {{- if strings.HasSuffix .RelPermalink "/404.html" }}
     <meta name="robots" content="noindex, nofollow">

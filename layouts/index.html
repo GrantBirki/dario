@@ -27,10 +27,10 @@
 
     {{- range sort (where .Site.Sections "Section" "in" .Site.MainSections) "Weight" }}
     <section>
-    <h2>{{ .Title  }}</h2>
+    <h2>{{ .Title | .RenderString }}</h2>
     <ul>
         {{- range where .Site.RegularPages "Section" .Section }}
-        <li><a href="{{ .Permalink }}">{{ .Title| markdownify | plainify  }}</a></li>
+        <li><a href="{{ .Permalink }}">{{ .Title | .RenderString | plainify  }}</a></li>
         {{- end }}
     </ul>
     </section>
