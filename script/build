@@ -1,0 +1,34 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+source script/env "$@"
+source script/lib/hugo-fixture.sh
+
+require_cmd hugo
+require_cmd mktemp
+
+build_dir="$TMP_DIR/build"
+rm -rf "$build_dir"
+mkdir -p "$build_dir"
+
+work_dir="$(mktemp -d "$TMP_DIR/hugo-build-fixture.XXXXXX")"
+site_dir="$work_dir/site"
+
+cleanup() {
+  rm -rf "$work_dir"
+}
+trap cleanup EXIT
+
+create_hugo_fixture_site "$site_dir" "$DIR"
+
+echo -e "${BLUE}Building fixture site to:${OFF} ${PURPLE}${build_dir}${OFF}"
+HUGO_ENV=production hugo \
+  --source "$site_dir" \
+  --destination "$build_dir" \
+  --cleanDestinationDir \
+  --panicOnWarning \
+  --printPathWarnings \
+  --minify
+
+echo -e "${GREEN}Build complete${OFF}"

@@ -1,5 +1,9 @@
 # dario 🖊️
 
+[![lint](https://github.com/GrantBirki/dario/actions/workflows/lint.yml/badge.svg)](https://github.com/GrantBirki/dario/actions/workflows/lint.yml)
+[![test](https://github.com/GrantBirki/dario/actions/workflows/test.yml/badge.svg)](https://github.com/GrantBirki/dario/actions/workflows/test.yml)
+[![build](https://github.com/GrantBirki/dario/actions/workflows/build.yml/badge.svg)](https://github.com/GrantBirki/dario/actions/workflows/build.yml)
+
 A minimal hugo theme inspired by Dario Amodei's personal [website](https://darioamodei.com/). It is designed to be as minimal, performant, and as elegant as possible for reading.
 
 View the [live demo](https://log.birki.io) to see what it looks like ([source code](https://github.com/GrantBirki/dario)).
@@ -11,6 +15,19 @@ View the [live demo](https://log.birki.io) to see what it looks like ([source co
 This theme is designed to be minimal and the page speed insights are as follows:
 
 ![100](https://raw.githubusercontent.com/GrantBirki/dario/main/docs/assets/100.png)
+
+## Development
+
+This repository follows the ["scripts to rule them all"](https://github.blog/engineering/scripts-to-rule-them-all/) pattern:
+
+```bash
+script/bootstrap
+script/lint
+script/test
+script/build
+```
+
+CI executes these same scripts directly.
 
 ## Installation
 
@@ -188,7 +205,7 @@ Set the `disableSocialMeta` parameter to turn off HTML tags related to [Open Gra
 ```
 
 If you wish to add your own non-standard meta tags for things like Bitcoin,
-PGP, and so on, you can add them in `layouts/partials/nonstdmeta.md`:
+PGP, and so on, you can add them in `layouts/partials/nonstdmeta.html`:
 
 ```html
 <meta name="email" content="mail@example.com">

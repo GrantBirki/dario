@@ -1,0 +1,46 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+# COLORS
+export OFF='\033[0m'
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export BLUE='\033[0;34m'
+export PURPLE='\033[0;35m'
+
+# set the working directory to the root of the project
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
+export DIR
+
+# The name of the repository is the name of the directory (usually)
+REPO_NAME=$(basename "$DIR")
+export REPO_NAME
+
+TMP_DIR="$DIR/tmp"
+export TMP_DIR
+mkdir -p "$TMP_DIR"
+
+die() {
+  echo -e "${RED}error:${OFF} $*" >&2
+  exit 1
+}
+
+warn() {
+  echo -e "${RED}warning:${OFF} $*" >&2
+}
+
+require_cmd() {
+  local cmd="$1"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    die "missing required tool: $cmd"
+  fi
+}
+
+as_root() {
+  if command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
