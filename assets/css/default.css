@@ -20,7 +20,7 @@
   --font-family-base: "Newsreader";
   --font-size-base: 20px;
   --content-max-inline-size: 620px;
-  --content-padding: 0 20px;
+  --content-padding: 20px;
   --focus-color: #0066cc;
 }
 
@@ -233,7 +233,7 @@ p.intro {
 header > div {
   max-inline-size: var(--content-max-inline-size);
   margin-inline: auto;
-  padding-block: var(--content-padding);
+  padding-block: 0;
   padding-inline: var(--content-padding);
   box-sizing: border-box;
 }
