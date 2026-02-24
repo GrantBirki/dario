@@ -5,8 +5,9 @@ set -euo pipefail
 source script/env "$@"
 
 HUGO_VERSION_FILE="$DIR/.github/.hugo-version"
+HUGO_VENDOR_BIN_DIR="$DIR/.github/vendor/bin"
 
-read_hugo_version_spec() {
+read_hugo_version() {
   [[ -f "$HUGO_VERSION_FILE" ]] || die "missing Hugo version file: $HUGO_VERSION_FILE"
   local version
   version="$(tr -d '[:space:]' < "$HUGO_VERSION_FILE")"
@@ -14,89 +15,41 @@ read_hugo_version_spec() {
   printf '%s' "$version"
 }
 
-hugo_semver_from_spec() {
-  local spec="$1"
-  spec="${spec#v}"
-  printf '%s' "${spec%%+*}"
+normalize_semver() {
+  local version="$1"
+  version="${version#v}"
+  version="${version%%+*}"
+  version="${version%%-*}"
+  printf '%s' "$version"
 }
 
-hugo_asset_prefix_from_spec() {
-  local spec="$1"
-  if [[ "$spec" == *"+extended+withdeploy"* ]]; then
-    printf 'hugo_extended_withdeploy'
-    return
-  fi
-  if [[ "$spec" == *"+extended"* ]]; then
-    printf 'hugo_extended'
-    return
-  fi
-  printf 'hugo'
-}
-
-hugo_installed_spec() {
+hugo_installed_semver() {
   if ! command -v hugo >/dev/null 2>&1; then
     return 1
   fi
-  hugo version | awk '{print $2}'
+  normalize_semver "$(hugo version | awk '{print $2}')"
 }
 
-machine_arch() {
-  local machine
-  machine="$(uname -m)"
-  case "$machine" in
-    x86_64 | amd64)
-      printf 'amd64'
-      ;;
-    arm64 | aarch64)
-      printf 'arm64'
-      ;;
-    *)
-      die "unsupported CPU architecture: $machine"
-      ;;
-  esac
+install_vendored_hugo_linux() {
+  require_cmd dpkg
+
+  local version="$1"
+  local deb_pkg="$HUGO_VENDOR_BIN_DIR/hugo_extended_${version}_linux-amd64.deb"
+  [[ -f "$deb_pkg" ]] || die "missing vendored Hugo package: $deb_pkg"
+
+  echo -e "${BLUE}Installing vendored Hugo package:${OFF} ${PURPLE}${deb_pkg}${OFF}"
+  as_root dpkg -i "$deb_pkg"
 }
 
-install_hugo_linux_tarball() {
-  require_cmd curl
-  require_cmd tar
-  require_cmd install
-
-  local spec="$1"
-  local semver prefix arch url tmp_dir archive
-  semver="$(hugo_semver_from_spec "$spec")"
-  prefix="$(hugo_asset_prefix_from_spec "$spec")"
-  arch="$(machine_arch)"
-  url="https://github.com/gohugoio/hugo/releases/download/v${semver}/${prefix}_${semver}_linux-${arch}.tar.gz"
-
-  tmp_dir="$(mktemp -d "$TMP_DIR/hugo-install.XXXXXX")"
-  archive="$tmp_dir/hugo.tar.gz"
-
-  echo -e "${BLUE}Installing Hugo from:${OFF} ${PURPLE}${url}${OFF}"
-  curl -fsSL "$url" -o "$archive"
-  tar -xzf "$archive" -C "$tmp_dir"
-  [[ -x "$tmp_dir/hugo" ]] || die "downloaded archive does not contain a hugo binary"
-
-  as_root install -m 0755 "$tmp_dir/hugo" /usr/local/bin/hugo
-  rm -rf "$tmp_dir"
-}
-
-install_hugo_macos_pkg() {
-  require_cmd curl
+install_vendored_hugo_macos() {
   require_cmd installer
 
-  local spec="$1"
-  local semver prefix url tmp_dir pkg
-  semver="$(hugo_semver_from_spec "$spec")"
-  prefix="$(hugo_asset_prefix_from_spec "$spec")"
-  url="https://github.com/gohugoio/hugo/releases/download/v${semver}/${prefix}_${semver}_darwin-universal.pkg"
+  local version="$1"
+  local pkg="$HUGO_VENDOR_BIN_DIR/hugo_extended_${version}_darwin-universal.pkg"
+  [[ -f "$pkg" ]] || die "missing vendored Hugo package: $pkg"
 
-  tmp_dir="$(mktemp -d "$TMP_DIR/hugo-install.XXXXXX")"
-  pkg="$tmp_dir/hugo.pkg"
-
-  echo -e "${BLUE}Installing Hugo from:${OFF} ${PURPLE}${url}${OFF}"
-  curl -fsSL "$url" -o "$pkg"
+  echo -e "${BLUE}Installing vendored Hugo package:${OFF} ${PURPLE}${pkg}${OFF}"
   as_root installer -pkg "$pkg" -target /
-  rm -rf "$tmp_dir"
 }
 
 install_hugo_default_linux() {
@@ -115,35 +68,30 @@ install_hugo_default_macos() {
 }
 
 install_hugo_for_ci() {
-  local expected installed
-  expected="$(read_hugo_version_spec)"
-  installed="$(hugo_installed_spec || true)"
-
-  if [[ "$installed" == "$expected" ]]; then
-    echo -e "${GREEN}Hugo version:${OFF} $(hugo version)"
-    return
-  fi
-
-  if [[ -n "$installed" ]]; then
-    warn "hugo version mismatch: found ${installed}, expected ${expected}; installing pinned version"
+  local expected_version expected_semver installed_semver
+  expected_version="$(read_hugo_version)"
+  expected_semver="$(normalize_semver "$expected_version")"
+  installed_semver="$(hugo_installed_semver || true)"
+  if [[ -n "$installed_semver" ]]; then
+    warn "CI install is pinned; replacing local Hugo ${installed_semver} with vendored ${expected_semver}"
   else
-    warn "hugo not found; installing pinned version ${expected}"
+    warn "hugo not found; installing vendored version ${expected_semver}"
   fi
 
   case "$OSTYPE" in
     linux-gnu*)
-      install_hugo_linux_tarball "$expected"
+      install_vendored_hugo_linux "$expected_version"
       ;;
     darwin*)
-      install_hugo_macos_pkg "$expected"
+      install_vendored_hugo_macos "$expected_version"
       ;;
     *)
       die "unsupported OS for CI Hugo install: $OSTYPE"
       ;;
   esac
 
-  installed="$(hugo_installed_spec || true)"
-  [[ "$installed" == "$expected" ]] || die "expected Hugo ${expected}, but found ${installed:-<missing>}"
+  installed_semver="$(hugo_installed_semver || true)"
+  [[ "$installed_semver" == "$expected_semver" ]] || die "expected Hugo ${expected_semver}, but found ${installed_semver:-<missing>}"
   echo -e "${GREEN}Hugo version:${OFF} $(hugo version)"
 }
 
