@@ -72,10 +72,9 @@ install_hugo_for_ci() {
   expected_version="$(read_hugo_version)"
   expected_semver="$(normalize_semver "$expected_version")"
   installed_semver="$(hugo_installed_semver || true)"
+  echo -e "${BLUE}Installing vendored Hugo version:${OFF} ${PURPLE}${expected_semver}${OFF}"
   if [[ -n "$installed_semver" ]]; then
-    warn "CI install is pinned; replacing local Hugo ${installed_semver} with vendored ${expected_semver}"
-  else
-    warn "hugo not found; installing vendored version ${expected_semver}"
+    echo -e "${BLUE}Detected preinstalled Hugo:${OFF} ${PURPLE}${installed_semver}${OFF}"
   fi
 
   case "$OSTYPE" in
