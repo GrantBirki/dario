@@ -1,0 +1,101 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+source script/env "$@"
+
+require_cmd hugo
+require_cmd grep
+require_cmd mktemp
+
+work_dir="$(mktemp -d "$TMP_DIR/hugo-fixture.XXXXXX")"
+site_dir="$work_dir/site"
+output_dir="$work_dir/public"
+
+cleanup() {
+  rm -rf "$work_dir"
+}
+trap cleanup EXIT
+
+mkdir -p "$site_dir/content/posts" "$site_dir/themes"
+ln -s "$DIR" "$site_dir/themes/dario"
+
+cat > "$site_dir/hugo.toml" <<'EOF'
+baseURL = "https://example.org/"
+languageCode = "en-us"
+title = "Fixture Site"
+theme = "dario"
+
+[params]
+  description = "Fixture description"
+
+[params.author]
+  name = "Fixture Author"
+EOF
+
+cat > "$site_dir/content/_index.md" <<'EOF'
++++
+title = "Home *Post*"
+subtitle = "Fixture subtitle"
+description = "Fixture homepage description"
+homePageIsPost = true
+date = 2026-02-24T00:00:00Z
+author = "Fixture Author"
++++
+
+Fixture **content** for the homepage.
+EOF
+
+cat > "$site_dir/content/posts/first.md" <<'EOF'
++++
+title = "First *Post*"
+description = "Fixture post"
+ogDescription = "A & B"
+date = 2026-02-24T00:00:00Z
++++
+
+Hello from the fixture post.
+EOF
+
+echo -e "${BLUE}Building fixture site${OFF}"
+hugo \
+  --source "$site_dir" \
+  --destination "$output_dir" \
+  --panicOnWarning \
+  --printPathWarnings
+
+home_html="$output_dir/index.html"
+post_html="$output_dir/posts/first/index.html"
+
+[[ -f "$home_html" ]] || die "expected fixture homepage output at $home_html"
+[[ -f "$post_html" ]] || die "expected fixture post output at $post_html"
+
+if ! grep -Fq "<h1>Home <em>Post</em></h1>" "$home_html"; then
+  die "homepage title markdown did not render as expected"
+fi
+
+if grep -Fq "First *Post*" "$home_html"; then
+  die "homepage post list title was not plainified as expected"
+fi
+
+if ! grep -Fq "First Post" "$home_html"; then
+  die "homepage post list title text missing expected plainified value"
+fi
+
+if ! grep -Fq "<h1>First <em>Post</em></h1>" "$post_html"; then
+  die "single post title markdown did not render as expected"
+fi
+
+if grep -Fq "/default.png" "$home_html"; then
+  die "homepage still references missing default OG image fallback"
+fi
+
+if rg -n "A & B" "$output_dir/og"/*.svg >/dev/null; then
+  die "OG SVG contains unescaped ampersand in description"
+fi
+
+if ! rg -n "A &amp; B" "$output_dir/og"/*.svg >/dev/null; then
+  die "OG SVG is missing escaped description content"
+fi
+
+echo -e "${GREEN}Fixture tests passed${OFF}"

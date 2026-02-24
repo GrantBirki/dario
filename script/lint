@@ -1,0 +1,27 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+source script/env "$@"
+
+require_cmd hugo
+require_cmd bash
+
+for file in "$DIR"/script/*; do
+  [[ -f "$file" ]] || continue
+  bash -n "$file"
+done
+
+if rg -n '@media \((min|max)-inline-size:' "$DIR/assets/css/default.css" >/dev/null; then
+  die "invalid media query feature in assets/css/default.css: use min-width/max-width for viewport queries"
+fi
+
+echo -e "${BLUE}Running Hugo lint checks${OFF}"
+hugo \
+  --source "$DIR" \
+  --renderToMemory \
+  --panicOnWarning \
+  --printPathWarnings \
+  --printI18nWarnings
+
+echo -e "${GREEN}Lint complete${OFF}"

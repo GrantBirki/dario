@@ -1,0 +1,39 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+source script/env "$@"
+
+install_hugo_linux() {
+  if command -v apt-get >/dev/null 2>&1; then
+    as_root apt-get update
+    as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y hugo
+    return
+  fi
+
+  die "unable to install hugo automatically on linux (apt-get not found)"
+}
+
+install_hugo_macos() {
+  require_cmd brew
+  brew install hugo
+}
+
+if ! command -v hugo >/dev/null 2>&1; then
+  warn "hugo not found; installing..."
+
+  case "$OSTYPE" in
+    linux-gnu*)
+      install_hugo_linux
+      ;;
+    darwin*)
+      install_hugo_macos
+      ;;
+    *)
+      die "unsupported OS for automatic hugo install: $OSTYPE"
+      ;;
+  esac
+fi
+
+require_cmd hugo
+echo -e "${GREEN}Hugo version:${OFF} $(hugo version)"

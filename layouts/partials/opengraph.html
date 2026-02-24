@@ -11,12 +11,10 @@
 {{- end }}
 
 {{- $uniqueName := "" }}
-{{- $isDefault := false }}
 {{- with .File }}
     {{- $uniqueName = printf "og/og-image-%s.svg" .UniqueID }}
 {{- else }}
-    {{- $uniqueName = "default.png" }}
-    {{- $isDefault = true }}
+    {{- $uniqueName = printf "og/og-image-%s.svg" (md5 .RelPermalink) }}
 {{- end }}
 
 {{- $svg := printf `
@@ -44,20 +42,16 @@
             </div>
         </foreignObject>
     </svg>
-    ` ($title | htmlEscape) $description | safeHTML }}
+    ` ($title | htmlEscape) ($description | htmlEscape) | safeHTML }}
 
 {{- $generatedSVG := resources.FromString $uniqueName $svg | resources.ExecuteAsTemplate $uniqueName . -}}
 
 {{- /* Determine which image URL to use */ -}}
 {{- $ogImageURL := "" }}
-{{- if $isDefault }}
-    {{- $ogImageURL = "/default.png" }}
+{{- with .Params.ogImage }}
+    {{- $ogImageURL = . }}
 {{- else }}
-    {{- with .Params.ogImage }}
-        {{- $ogImageURL = . }}
-    {{- else }}
-        {{- $ogImageURL = $generatedSVG.RelPermalink }}
-    {{- end }}
+    {{- $ogImageURL = $generatedSVG.RelPermalink }}
 {{- end }}
 
 <!-- General Open Graph Meta Tags -->

@@ -1,0 +1,20 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+source script/env "$@"
+
+require_cmd hugo
+
+build_dir="$TMP_DIR/build"
+rm -rf "$build_dir"
+mkdir -p "$build_dir"
+
+echo -e "${BLUE}Building site to:${OFF} ${PURPLE}${build_dir}${OFF}"
+HUGO_ENV=production hugo \
+  --source "$DIR" \
+  --destination "$build_dir" \
+  --cleanDestinationDir \
+  --minify
+
+echo -e "${GREEN}Build complete${OFF}"

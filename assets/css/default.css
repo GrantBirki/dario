@@ -22,6 +22,7 @@
   --content-max-inline-size: 620px;
   --content-padding: 20px;
   --focus-color: #0066cc;
+  --muted-text-color: #666666;
 }
 
 body,
@@ -55,6 +56,7 @@ header h1 a {
   --invert-percentage: 100%;
   --code-bg: rgb(55, 56, 62);
   --hljs-bg: rgb(46, 46, 51);
+  --muted-text-color: #b3b3b3;
 }
 
 .dark-mode-off:root {
@@ -76,6 +78,7 @@ header h1 a {
   --invert-percentage: 0%;
   --code-bg: rgb(223, 223, 223);
   --hljs-bg: rgb(28, 29, 33);
+  --muted-text-color: #666666;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -98,6 +101,7 @@ header h1 a {
     --invert-percentage: 100%;
     --code-bg: rgb(55, 56, 62);
     --hljs-bg: rgb(46, 46, 51);
+    --muted-text-color: #b3b3b3;
   }
 }
 
@@ -121,6 +125,7 @@ header h1 a {
     --invert-percentage: 0%;
     --code-bg: rgb(223, 223, 223);
     --hljs-bg: rgb(28, 29, 33);
+    --muted-text-color: #666666;
   }
 }
 
@@ -196,6 +201,10 @@ h6:hover .anchor {
   opacity: 0.5;
 }
 
+.anchor {
+  display: none;
+}
+
 a {
   color: inherit;
   text-decoration: underline;
@@ -238,7 +247,7 @@ header > div {
   box-sizing: border-box;
 }
 
-@media (min-inline-size: 1076px) {
+@media (min-width: 1076px) {
   body.has-toc .content-wrapper,
   body.has-toc header > div {
     max-inline-size: var(--content-max-inline-size);
@@ -356,6 +365,11 @@ p a:hover {
   background-color: var(--bg-color);
 }
 
+.toggle-input:focus-visible + .toggle-label {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+}
+
 /* Typography */
 h1,
 h2,
@@ -407,7 +421,7 @@ center {
 }
 
 /* Mobile Typography */
-@media (max-inline-size: 1076px) {
+@media (max-width: 1076px) {
   h1 {
     font-size: 2.4em;
   }
@@ -424,7 +438,7 @@ center {
 .author-date {
   font-weight: 400;
   font-size: 0.9em;
-  color: #767676;
+  color: var(--muted-text-color);
   margin-block-start: 2em;
   margin-block-end: 0em;
   line-height: 1.4;
@@ -453,7 +467,7 @@ hr:after {
   text-align: center;
 }
 
-@media (min-inline-size: 1400px) {
+@media (min-width: 1400px) {
   .content-wrapper,
   header > div {
     max-inline-size: var(--content-max-inline-size);
