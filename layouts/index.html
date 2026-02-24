@@ -1,7 +1,7 @@
 {{- define "main" }}
     {{- with .Site.GetPage "_index.md" }}
         {{- if .Params.homePageIsPost }}
-    <h1>{{ .Title }}</h1>
+    <h1>{{ .Title | .RenderString }}</h1>
     <h4>{{ .Params.description }}</h4>
     <p class="author-date"><time datetime="{{ .Date }}">{{ .Date.Format "January 2, 2006" }}</time> - {{ .Params.author }}</p>
 
