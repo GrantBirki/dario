@@ -4,7 +4,102 @@ set -euo pipefail
 
 source script/env "$@"
 
-install_hugo_linux() {
+HUGO_VERSION_FILE="$DIR/.github/.hugo-version"
+
+read_hugo_version_spec() {
+  [[ -f "$HUGO_VERSION_FILE" ]] || die "missing Hugo version file: $HUGO_VERSION_FILE"
+  local version
+  version="$(tr -d '[:space:]' < "$HUGO_VERSION_FILE")"
+  [[ -n "$version" ]] || die "Hugo version file is empty: $HUGO_VERSION_FILE"
+  printf '%s' "$version"
+}
+
+hugo_semver_from_spec() {
+  local spec="$1"
+  spec="${spec#v}"
+  printf '%s' "${spec%%+*}"
+}
+
+hugo_asset_prefix_from_spec() {
+  local spec="$1"
+  if [[ "$spec" == *"+extended+withdeploy"* ]]; then
+    printf 'hugo_extended_withdeploy'
+    return
+  fi
+  if [[ "$spec" == *"+extended"* ]]; then
+    printf 'hugo_extended'
+    return
+  fi
+  printf 'hugo'
+}
+
+hugo_installed_spec() {
+  if ! command -v hugo >/dev/null 2>&1; then
+    return 1
+  fi
+  hugo version | awk '{print $2}'
+}
+
+machine_arch() {
+  local machine
+  machine="$(uname -m)"
+  case "$machine" in
+    x86_64 | amd64)
+      printf 'amd64'
+      ;;
+    arm64 | aarch64)
+      printf 'arm64'
+      ;;
+    *)
+      die "unsupported CPU architecture: $machine"
+      ;;
+  esac
+}
+
+install_hugo_linux_tarball() {
+  require_cmd curl
+  require_cmd tar
+  require_cmd install
+
+  local spec="$1"
+  local semver prefix arch url tmp_dir archive
+  semver="$(hugo_semver_from_spec "$spec")"
+  prefix="$(hugo_asset_prefix_from_spec "$spec")"
+  arch="$(machine_arch)"
+  url="https://github.com/gohugoio/hugo/releases/download/v${semver}/${prefix}_${semver}_linux-${arch}.tar.gz"
+
+  tmp_dir="$(mktemp -d "$TMP_DIR/hugo-install.XXXXXX")"
+  archive="$tmp_dir/hugo.tar.gz"
+
+  echo -e "${BLUE}Installing Hugo from:${OFF} ${PURPLE}${url}${OFF}"
+  curl -fsSL "$url" -o "$archive"
+  tar -xzf "$archive" -C "$tmp_dir"
+  [[ -x "$tmp_dir/hugo" ]] || die "downloaded archive does not contain a hugo binary"
+
+  as_root install -m 0755 "$tmp_dir/hugo" /usr/local/bin/hugo
+  rm -rf "$tmp_dir"
+}
+
+install_hugo_macos_pkg() {
+  require_cmd curl
+  require_cmd installer
+
+  local spec="$1"
+  local semver prefix url tmp_dir pkg
+  semver="$(hugo_semver_from_spec "$spec")"
+  prefix="$(hugo_asset_prefix_from_spec "$spec")"
+  url="https://github.com/gohugoio/hugo/releases/download/v${semver}/${prefix}_${semver}_darwin-universal.pkg"
+
+  tmp_dir="$(mktemp -d "$TMP_DIR/hugo-install.XXXXXX")"
+  pkg="$tmp_dir/hugo.pkg"
+
+  echo -e "${BLUE}Installing Hugo from:${OFF} ${PURPLE}${url}${OFF}"
+  curl -fsSL "$url" -o "$pkg"
+  as_root installer -pkg "$pkg" -target /
+  rm -rf "$tmp_dir"
+}
+
+install_hugo_default_linux() {
   if command -v apt-get >/dev/null 2>&1; then
     as_root apt-get update
     as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y hugo
@@ -14,26 +109,69 @@ install_hugo_linux() {
   die "unable to install hugo automatically on linux (apt-get not found)"
 }
 
-install_hugo_macos() {
+install_hugo_default_macos() {
   require_cmd brew
   brew install hugo
 }
 
-if ! command -v hugo >/dev/null 2>&1; then
-  warn "hugo not found; installing..."
+install_hugo_for_ci() {
+  local expected installed
+  expected="$(read_hugo_version_spec)"
+  installed="$(hugo_installed_spec || true)"
+
+  if [[ "$installed" == "$expected" ]]; then
+    echo -e "${GREEN}Hugo version:${OFF} $(hugo version)"
+    return
+  fi
+
+  if [[ -n "$installed" ]]; then
+    warn "hugo version mismatch: found ${installed}, expected ${expected}; installing pinned version"
+  else
+    warn "hugo not found; installing pinned version ${expected}"
+  fi
 
   case "$OSTYPE" in
     linux-gnu*)
-      install_hugo_linux
+      install_hugo_linux_tarball "$expected"
       ;;
     darwin*)
-      install_hugo_macos
+      install_hugo_macos_pkg "$expected"
+      ;;
+    *)
+      die "unsupported OS for CI Hugo install: $OSTYPE"
+      ;;
+  esac
+
+  installed="$(hugo_installed_spec || true)"
+  [[ "$installed" == "$expected" ]] || die "expected Hugo ${expected}, but found ${installed:-<missing>}"
+  echo -e "${GREEN}Hugo version:${OFF} $(hugo version)"
+}
+
+install_hugo_default() {
+  if command -v hugo >/dev/null 2>&1; then
+    echo -e "${GREEN}Hugo version:${OFF} $(hugo version)"
+    return
+  fi
+
+  warn "hugo not found; installing..."
+  case "$OSTYPE" in
+    linux-gnu*)
+      install_hugo_default_linux
+      ;;
+    darwin*)
+      install_hugo_default_macos
       ;;
     *)
       die "unsupported OS for automatic hugo install: $OSTYPE"
       ;;
   esac
-fi
 
-require_cmd hugo
-echo -e "${GREEN}Hugo version:${OFF} $(hugo version)"
+  require_cmd hugo
+  echo -e "${GREEN}Hugo version:${OFF} $(hugo version)"
+}
+
+if [[ "${CI:-}" == "true" ]]; then
+  install_hugo_for_ci
+else
+  install_hugo_default
+fi

@@ -2,11 +2,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {{- with (partial "objects/author.html" .).name }}
+    {{- $author := partialCached "objects/author.html" . .Site.Language.Lang -}}
+    {{- with $author.name }}
     <meta name="author" content="{{ . }}">
     {{- end }}
 
-    {{- $page := partial "objects/page.html" . }}
+    {{- $page := partialCached "objects/page.html" . .RelPermalink -}}
     <meta name="description" content="{{- $page.description -}}">
     <title>{{ $page.title }}</title>
 
@@ -22,7 +23,6 @@
 
     {{- if not .Site.Params.disableFontPreload }}
     <link rel="preload" href="{{ "fonts/Newsreader.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{{ "fonts/Newsreader-italic.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
     {{- end }}
 
     {{- $defaultCSS := resources.Get "css/default.css" | minify | fingerprint }}
@@ -45,8 +45,12 @@
     <script src="{{ $darkmodeJS.RelPermalink }}" integrity="{{ $darkmodeJS.Data.Integrity }}" defer></script>
     {{- end }}
 
-    {{- $footnotesJS := resources.Get "js/footnotes.js" | minify | fingerprint }}
+    {{- with .Content }}
+        {{- if or (in . "id=\"fnref") (in . "class=\"footnote-ref\"") }}
+            {{- $footnotesJS := resources.Get "js/footnotes.js" | minify | fingerprint }}
     <script src="{{ $footnotesJS.RelPermalink }}" integrity="{{ $footnotesJS.Data.Integrity }}" defer></script>
+        {{- end }}
+    {{- end }}
 
     {{- if templates.Exists "partials/nonstdmeta.html" }}
 {{ partial "nonstdmeta.html" . }}

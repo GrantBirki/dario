@@ -1,14 +1,6 @@
-{{- $page := partial "objects/page.html" . -}}
+{{- $page := partialCached "objects/page.html" . .RelPermalink -}}
 {{- $title := .Params.ogTitle | default $page.title -}}
 {{- $description := .Params.ogDescription | default $page.description -}}
-
-{{- /* Handle base URL for local dev vs production */ -}}
-{{- $baseURL := .Site.BaseURL | strings.TrimSuffix "/" }}
-{{- if not (strings.Contains $baseURL "localhost") }}
-    {{- if not (strings.HasPrefix $baseURL "https://") }}
-        {{- $baseURL = replace $baseURL "http://" "https://" }}
-    {{- end }}
-{{- end }}
 
 {{- $uniqueName := "" }}
 {{- with .File }}
@@ -25,7 +17,7 @@
             }
             @font-face {
               font-family: 'Newsreader';
-              src: url('/fonts/Newsreader.woff2') format('woff2');
+              src: url('../fonts/Newsreader.woff2') format('woff2');
             }
             .title, .description {
               font-family: 'Newsreader', serif;
@@ -47,29 +39,32 @@
 {{- $generatedSVG := resources.FromString $uniqueName $svg | resources.ExecuteAsTemplate $uniqueName . -}}
 
 {{- /* Determine which image URL to use */ -}}
-{{- $ogImageURL := "" }}
+{{- $ogImageURL := $generatedSVG.Permalink }}
 {{- with .Params.ogImage }}
-    {{- $ogImageURL = . }}
-{{- else }}
-    {{- $ogImageURL = $generatedSVG.RelPermalink }}
+    {{- if or (strings.HasPrefix . "http://") (strings.HasPrefix . "https://") (strings.HasPrefix . "//") }}
+        {{- $ogImageURL = . }}
+    {{- else }}
+        {{- $ogImageURL = . | absURL }}
+    {{- end }}
 {{- end }}
 
 <!-- General Open Graph Meta Tags -->
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
-<meta property="og:image" content="{{ $baseURL }}{{ $ogImageURL }}">
+<meta property="og:image" content="{{ $ogImageURL }}">
 <meta property="og:image:type" content={{- if strings.HasSuffix $ogImageURL ".svg" -}}"image/svg+xml"{{- else -}}"image/png"{{- end }}>
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:type" content="website">
-<meta property="og:url" content="{{ $baseURL }}{{ .RelPermalink }}">
+<meta property="og:url" content="{{ .Permalink }}">
 <meta property="og:locale" content="{{- site.Language.LanguageCode -}}">
 
 <!-- Twitter Cards -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $title }}">
 <meta name="twitter:description" content="{{ $description }}">
-<meta name="twitter:image" content="{{ $baseURL }}{{ $ogImageURL }}">
-{{- with (partial "objects/author.html" .).twitter }}
+<meta name="twitter:image" content="{{ $ogImageURL }}">
+{{- $author := partialCached "objects/author.html" . .Site.Language.Lang -}}
+{{- with $author.twitter }}
 <meta name="twitter:creator" content="{{ . }}">
 {{- end }}

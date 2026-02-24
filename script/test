@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source script/env "$@"
+source script/lib/hugo-fixture.sh
 
 require_cmd hugo
 require_cmd grep
@@ -17,45 +18,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$site_dir/content/posts" "$site_dir/themes"
-ln -s "$DIR" "$site_dir/themes/dario"
-
-cat > "$site_dir/hugo.toml" <<'EOF'
-baseURL = "https://example.org/"
-languageCode = "en-us"
-title = "Fixture Site"
-theme = "dario"
-
-[params]
-  description = "Fixture description"
-
-[params.author]
-  name = "Fixture Author"
-EOF
-
-cat > "$site_dir/content/_index.md" <<'EOF'
-+++
-title = "Home *Post*"
-subtitle = "Fixture subtitle"
-description = "Fixture homepage description"
-homePageIsPost = true
-date = 2026-02-24T00:00:00Z
-author = "Fixture Author"
-+++
-
-Fixture **content** for the homepage.
-EOF
-
-cat > "$site_dir/content/posts/first.md" <<'EOF'
-+++
-title = "First *Post*"
-description = "Fixture post"
-ogDescription = "A & B"
-date = 2026-02-24T00:00:00Z
-+++
-
-Hello from the fixture post.
-EOF
+create_hugo_fixture_site "$site_dir" "$DIR"
 
 echo -e "${BLUE}Building fixture site${OFF}"
 hugo \
@@ -66,9 +29,15 @@ hugo \
 
 home_html="$output_dir/index.html"
 post_html="$output_dir/posts/first/index.html"
+absolute_og_html="$output_dir/posts/absolute-og/index.html"
+no_anchor_html="$output_dir/posts/no-anchors/index.html"
+css_file="$(ls "$output_dir"/css/*.css | head -n1)"
 
 [[ -f "$home_html" ]] || die "expected fixture homepage output at $home_html"
 [[ -f "$post_html" ]] || die "expected fixture post output at $post_html"
+[[ -f "$absolute_og_html" ]] || die "expected fixture absolute-og output at $absolute_og_html"
+[[ -f "$no_anchor_html" ]] || die "expected fixture no-anchors output at $no_anchor_html"
+[[ -f "$css_file" ]] || die "expected processed CSS output under $output_dir/css"
 
 if ! grep -Fq "<h1>Home <em>Post</em></h1>" "$home_html"; then
   die "homepage title markdown did not render as expected"
@@ -86,15 +55,71 @@ if ! grep -Fq "<h1>First <em>Post</em></h1>" "$post_html"; then
   die "single post title markdown did not render as expected"
 fi
 
+if ! grep -Fq 'href="#details"' "$post_html"; then
+  die "expected heading anchor link for rendered markdown heading"
+fi
+
+if grep -Fq 'href="#without-anchor"' "$no_anchor_html"; then
+  die "disableAnchoredHeadings should disable heading anchor links"
+fi
+
+if ! grep -q "footnotes" "$post_html"; then
+  die "single post with footnotes should include footnotes script"
+fi
+
+if grep -q "footnotes" "$home_html"; then
+  die "homepage without footnotes should not include footnotes script"
+fi
+
+if ! grep -Fq "fonts/Newsreader.woff2" "$home_html"; then
+  die "expected preload for primary Newsreader font on homepage"
+fi
+
+if grep -Fq "fonts/Newsreader-italic.woff2" "$home_html"; then
+  die "homepage should not preload italic Newsreader font by default"
+fi
+
 if grep -Fq "/default.png" "$home_html"; then
   die "homepage still references missing default OG image fallback"
 fi
 
-if rg -n "A & B" "$output_dir/og"/*.svg >/dev/null; then
+if grep -Fq "https://example.org/blog/blog/" "$post_html"; then
+  die "OG URLs should not duplicate base path segments"
+fi
+
+if ! grep -Fq '<meta property="og:url" content="https://example.org/blog/posts/first/">' "$post_html"; then
+  die "single post should have a canonical og:url based on .Permalink"
+fi
+
+if ! grep -Eq '<meta property="og:image" content="https://example.org/blog/og/og-image-[^"]+\.svg">' "$post_html"; then
+  die "single post should reference generated OG image with a correct absolute URL"
+fi
+
+if ! grep -Fq '<meta property="og:image" content="https://cdn.example.com/og.png">' "$absolute_og_html"; then
+  die "absolute ogImage URL should be passed through without baseURL concatenation"
+fi
+
+if ! grep -Fq "url(../fonts/Newsreader.woff2)" "$css_file"; then
+  die "CSS should reference Newsreader regular font via relative URL"
+fi
+
+if ! grep -Fq "url(../fonts/Newsreader-italic.woff2)" "$css_file"; then
+  die "CSS should reference Newsreader italic font via relative URL"
+fi
+
+if grep -Fq "url(/fonts/" "$css_file"; then
+  die "CSS should not use root-absolute font URLs"
+fi
+
+if ! grep -Fq "../fonts/Newsreader.woff2" "$output_dir"/og/*.svg; then
+  die "generated OG SVG should use a relative font URL"
+fi
+
+if grep -q "A & B" "$output_dir"/og/*.svg; then
   die "OG SVG contains unescaped ampersand in description"
 fi
 
-if ! rg -n "A &amp; B" "$output_dir/og"/*.svg >/dev/null; then
+if ! grep -q "A &amp; B" "$output_dir"/og/*.svg; then
   die "OG SVG is missing escaped description content"
 fi
 

@@ -7,7 +7,7 @@
 {{ partial "head.html" . }}
 
 <body>
-{{ partial "header.html" . }}
+{{ partialCached "header.html" . .Site.Language.Lang }}
 
     <main class="content-wrapper">
         <article class="content-container">
@@ -17,7 +17,7 @@
         </article>
     </main>
 
-{{ partial "footer.html" . }}
+{{ partialCached "footer.html" . .Site.Language.Lang now.Year }}
 </body>
 
 </html>

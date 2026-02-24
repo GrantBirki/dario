@@ -205,7 +205,7 @@ Set the `disableSocialMeta` parameter to turn off HTML tags related to [Open Gra
 ```
 
 If you wish to add your own non-standard meta tags for things like Bitcoin,
-PGP, and so on, you can add them in `layouts/partials/nonstdmeta.md`:
+PGP, and so on, you can add them in `layouts/partials/nonstdmeta.html`:
 
 ```html
 <meta name="email" content="mail@example.com">

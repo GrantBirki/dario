@@ -6,13 +6,5 @@
     <p class="author-date">{{ printf `<time datetime="%s">%s</time>` (.Date.Format "2006-01-02T15:04:05Z07:00") (.Date.Format "January 2, 2006") | safeHTML }}</p>
     {{- end }}
 
-    {{- if not (.Param "disableAnchoredHeadings") }}
-
-{{ partial "anchored_headings.html" .Content }}
-
-    {{- else }}
-
 {{ .Content }}
-
-    {{- end }}
 {{- end }}
