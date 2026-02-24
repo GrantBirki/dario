@@ -19,7 +19,7 @@
   --highlight-color: rgba(137, 137, 222, 0.3);
   --font-family-base: "Newsreader";
   --font-size-base: 20px;
-  --content-max-width: 620px;
+  --content-max-inline-size: 620px;
   --content-padding: 0 20px;
   --focus-color: #0066cc;
 }
@@ -31,7 +31,7 @@ body,
 
 header h1 a {
   display: block;
-  width: 140px;
+  inline-size: 140px;
   font-family: var(--font-family-base), serif;
 }
 
@@ -129,7 +129,7 @@ header h1 a {
 }
 
 .dark-mode-on:root .toggle-input:checked + .toggle-label .toggle-slider {
-  transform: translateX(20px);
+  inset-inline-start: 22px;
   background-color: var(--bg-color);
 }
 
@@ -151,15 +151,19 @@ body {
   line-height: 1.6;
   color: var(--text-color);
   background-color: var(--bg-color);
-  margin: 0;
-  padding: 0;
+  margin-block: 0;
+  margin-inline: 0;
+  padding-block: 0;
+  padding-inline: 0;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 code {
   direction: ltr;
-  margin: auto 2px;
-  padding: 0.2em 0.4em;
+  margin-block: auto;
+  margin-inline: 2px;
+  padding-block: 0.2em;
+  padding-inline: 0.4em;
   font-size: 80%;
   line-height: 1.5;
   background: var(--code-bg);
@@ -169,7 +173,8 @@ code {
 
 pre code {
   display: block;
-  margin: auto 0;
+  margin-block: auto;
+  margin-inline: 0;
   color: rgb(213, 213, 214);
   background: var(--hljs-bg) !important;
   border-radius: var(--radius);
@@ -199,7 +204,8 @@ a {
 }
 
 a code {
-  margin: auto 0;
+  margin-block: auto;
+  margin-inline: 0;
 }
 
 a:hover code {
@@ -207,11 +213,11 @@ a:hover code {
 }
 
 ul {
-  padding-left: 20px;
+  padding-inline-start: 20px;
 }
 
 li {
-  margin-bottom: 0.8em;
+  margin-block-end: 0.8em;
 }
 
 strong {
@@ -219,40 +225,37 @@ strong {
 }
 
 p.intro {
-  margin-top: 0.5em;
+  margin-block-start: 0.5em;
 }
 
 /* Layout */
 .content-wrapper,
 header > div {
-  max-width: var(--content-max-width);
-  margin-left: auto;
-  margin-right: auto;
-  padding: var(--content-padding);
+  max-inline-size: var(--content-max-inline-size);
+  margin-inline: auto;
+  padding-block: var(--content-padding);
+  padding-inline: var(--content-padding);
   box-sizing: border-box;
 }
 
-@media (min-width: 1076px) {
+@media (min-inline-size: 1076px) {
   body.has-toc .content-wrapper,
   body.has-toc header > div {
-    max-width: var(--content-max-width);
-    padding-left: 20px;
-    padding-right: 20px;
-    margin-left: auto;
-    margin-right: auto;
+    max-inline-size: var(--content-max-inline-size);
+    padding-inline: 20px;
+    margin-inline: auto;
   }
 
   .toc-container {
-    left: calc(50% - (var(--content-max-width) / 2) - 270px);
+    inset-inline-start: calc(50% - (var(--content-max-inline-size) / 2) - 270px);
   }
 }
 
 /* Header Styles */
 header {
   background-color: var(--bg-color);
-  padding-bottom: 10px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  padding-block-end: 10px;
+  margin-block: 20px;
   transition: background-color 0.2s;
 }
 
@@ -261,7 +264,7 @@ header > div {
   justify-content: space-between;
   align-items: center;
   position: relative;
-  min-height: 44px; /* Add this */
+  min-block-size: 44px; /* Add this */
 }
 
 header h1,
@@ -270,12 +273,13 @@ header h1 a {
   font-weight: 600;
   font-size: 1.2em;
   line-height: 44px;
-  margin: 0;
+  margin-block: 0;
+  margin-inline: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 250px;
-  padding-top: 2px;
+  inline-size: 250px;
+  padding-block-start: 2px;
 }
 
 header h1 a {
@@ -305,10 +309,10 @@ p a:hover {
 .toggle-switch {
   visibility: hidden;
   position: relative;
-  width: 40px;
-  height: 20px;
+  inline-size: 40px;
+  block-size: 20px;
   flex-shrink: 0;
-  margin-left: 0;
+  margin-inline-start: 0;
 }
 
 .toggle-switch.visible {
@@ -317,17 +321,14 @@ p a:hover {
 
 .toggle-input {
   opacity: 0;
-  width: 0;
-  height: 0;
+  inline-size: 0;
+  block-size: 0;
 }
 
 .toggle-label {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: var(--bg-color);
   transition: background-color 0.2s ease, border-color 0.2s ease;
   border-radius: 34px;
@@ -337,12 +338,12 @@ p a:hover {
 .toggle-slider {
   position: absolute;
   content: "";
-  height: 14px;
-  width: 14px;
-  left: 2px;
-  bottom: 2px;
+  block-size: 14px;
+  inline-size: 14px;
+  inset-inline-start: 2px;
+  inset-block-end: 2px;
   background-color: var(--text-color);
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: inset-inline-start 0.2s ease, background-color 0.2s ease;
   border-radius: 50%;
 }
 
@@ -351,7 +352,7 @@ p a:hover {
 }
 
 .toggle-input:checked + .toggle-label .toggle-slider {
-  transform: translateX(20px);
+  inset-inline-start: 22px;
   background-color: var(--bg-color);
 }
 
@@ -369,8 +370,8 @@ h3,
 
 h1 {
   font-size: 3em;
-  margin-top: 1em;
-  margin-bottom: 0em;
+  margin-block-start: 1em;
+  margin-block-end: 0em;
   font-weight: 600;
   line-height: 1.1;
 }
@@ -381,32 +382,32 @@ h1.smaller {
 
 h2 {
   font-size: 1.6em;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
+  margin-block-start: 1em;
+  margin-block-end: 0.5em;
   font-weight: 600;
 }
 
 h3 {
   font-size: 1.2em;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
+  margin-block-start: 1em;
+  margin-block-end: 0.5em;
   font-weight: 600;
 }
 
 h4 {
   font-size: 1.1em;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
   font-weight: 400;
   font-style: italic;
 }
 
 center {
-  margin-top: 0.5em;
+  margin-block-start: 0.5em;
 }
 
 /* Mobile Typography */
-@media (max-width: 1076px) {
+@media (max-inline-size: 1076px) {
   h1 {
     font-size: 2.4em;
   }
@@ -424,15 +425,17 @@ center {
   font-weight: 400;
   font-size: 0.9em;
   color: #767676;
-  margin-top: 2em;
-  margin-bottom: 0em;
+  margin-block-start: 2em;
+  margin-block-end: 0em;
   line-height: 1.4;
 }
 
 .mobile-toc-link,
 .toc-container h2 {
   font-size: 1.2em;
-  padding: 130px 20px 30px;
+  padding-block-start: 130px;
+  padding-inline: 20px;
+  padding-block-end: 30px;
   font-weight: 600;
 }
 
@@ -445,32 +448,33 @@ hr:after {
   font-family: serif;
   font-weight: 200;
   font-size: 1.5em;
-  margin: 1em auto;
+  margin-block: 1em;
+  margin-inline: auto;
   text-align: center;
 }
 
-@media (min-width: 1400px) {
+@media (min-inline-size: 1400px) {
   .content-wrapper,
   header > div {
-    max-width: var(--content-max-width);
+    max-inline-size: var(--content-max-inline-size);
   }
 }
 
 /* Footnote Styles */
 .footnotes {
-  margin-top: 25px;
+  margin-block-start: 25px;
 }
 
 .footnotes-list {
   list-style-type: none;
-  padding-left: 0;
+  padding-inline-start: 0;
   counter-reset: footnote;
 }
 
 .footnote-item {
-  margin-bottom: 10px;
+  margin-block-end: 10px;
   position: relative;
-  padding-left: 0;
+  padding-inline-start: 0;
   display: block;
 }
 
@@ -481,7 +485,7 @@ hr:after {
 }
 
 .footnote-item sup {
-  margin-right: 4px;
+  margin-inline-end: 4px;
   flex-shrink: 0;
   font-size: 14px;
   font-weight: 500;
@@ -492,8 +496,11 @@ sup[id^="fnref"] a {
   font-size: 12px;
   font-weight: 500;
   color: inherit;
-  padding: 3px 3px 1px;
-  margin: 0 2px;
+  padding-block-start: 3px;
+  padding-inline: 3px;
+  padding-block-end: 1px;
+  margin-block: 0;
+  margin-inline: 2px;
   border-radius: 4px;
   background-color: var(--footnote-bg-color);
   position: relative;
@@ -511,7 +518,7 @@ sup[id^="fnref"] a:focus {
   font-size: 0.75em;
   vertical-align: middle;
   line-height: 0;
-  margin-left: 2px;
+  margin-inline-start: 2px;
 }
 
 .footnote-backref:hover {
@@ -522,10 +529,11 @@ sup[id^="fnref"] a:focus {
   position: absolute;
   background-color: var(--tooltip-bg-color);
   color: var(--tooltip-text-color);
-  padding: 20px;
+  padding-block: 20px;
+  padding-inline: 20px;
   border-radius: 4px;
   box-shadow: 0 2px 8px var(--tooltip-shadow-color);
-  max-width: 400px;
+  max-inline-size: 400px;
   z-index: 1000;
   font-size: 17px;
   line-height: 1.5;
@@ -533,17 +541,18 @@ sup[id^="fnref"] a:focus {
 }
 
 .footnote-tooltip p {
-  margin: 0 0 8px 0;
+  margin-block: 0 8px;
+  margin-inline: 0;
   display: block;
   align-items: flex-start;
 }
 
 .footnote-tooltip p:last-child {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .footnote-tooltip sup {
-  margin-right: 4px;
+  margin-inline-end: 4px;
   flex-shrink: 0;
   font-weight: 500;
 }
@@ -555,9 +564,10 @@ sup[id^="fnref"] a:focus {
 
 /* Footer Styles */
 footer {
-  margin-top: 0px;
-  margin-bottom: 20px;
-  padding: 20px 0;
+  margin-block-start: 0px;
+  margin-block-end: 20px;
+  padding-block: 20px;
+  padding-inline: 0;
   background-color: var(--bg-color);
   transition: background-color 0.2s ease;
 }
@@ -579,7 +589,7 @@ footer {
 
 .privacy-policy-link {
   text-align: center;
-  margin-top: 10px;
+  margin-block-start: 10px;
   font-size: 0.8em;
 }
 
@@ -597,11 +607,10 @@ footer {
 
 /* Subscribe Form Styles */
 .subscribe-form-container {
-  margin-top: 20px;
-  max-width: 400px;
+  margin-block-start: 20px;
+  max-inline-size: 400px;
   box-sizing: border-box;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -610,14 +619,15 @@ footer {
 .subscribe-form {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  margin-bottom: 10px;
+  inline-size: 100%;
+  margin-block-end: 10px;
 }
 
 .subscribe-form .email-input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+  inline-size: 100%;
+  padding-block: 10px;
+  padding-inline: 10px;
+  margin-block-end: 10px;
   border: 2px solid var(--border-color);
   border-radius: 4px;
   font-size: var(--font-size-base);
@@ -628,8 +638,9 @@ footer {
 }
 
 .subscribe-form .submit-button {
-  width: 100%;
-  padding: 10px 10px;
+  inline-size: 100%;
+  padding-block: 10px;
+  padding-inline: 10px;
   background-color: var(--subscribe-button-bg);
   color: var(--subscribe-button-text);
   border: none;
@@ -647,15 +658,16 @@ footer {
 
 #formMessage {
   text-align: center;
-  margin-top: 10px;
+  margin-block-start: 10px;
   font-weight: 400;
   font-style: italic;
-  width: 100%;
+  inline-size: 100%;
 }
 
 .content-wrapper img {
-  max-width: 100%;
-  height: auto;
+  max-inline-size: 100%;
+  block-size: auto;
   display: block;
-  margin: 1em auto;
+  margin-block: 1em;
+  margin-inline: auto;
 }
