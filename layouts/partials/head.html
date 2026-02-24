@@ -8,7 +8,6 @@
 
     {{- $page := partial "objects/page.html" . }}
     <meta name="description" content="{{- $page.description -}}">
-
     <title>{{ $page.title }}</title>
 
     {{- if strings.HasSuffix .RelPermalink "/404.html" }}

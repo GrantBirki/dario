@@ -1,9 +1,9 @@
 {{- define "main" }}
     <section>
-        <h2>{{ .Title }}</h2>
+        <h2>{{ .Title | .RenderString }}</h2>
         <ul>
             {{- range .Data.Terms.Alphabetical }}
-            <li><a href="{{ .Page.Permalink }}">{{ .Page.Name }}</a> ({{ .Count }})</li>
+            <li><a href="{{ .Page.Permalink }}">{{ .Page.Name | .Page.RenderString | plainify }}</a> ({{ .Count }})</li>
             {{- end }}
         </ul>
     </section>

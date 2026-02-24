@@ -1,4 +1,4 @@
-{{ $title := .Title | default .Site.Title }}
+{{ $title := .Title | default .Site.Title | .RenderString | plainify }}
 
 {{ $_summary := .Summary }}
 
