@@ -10,6 +10,13 @@
 {{ partialCached "header.html" . .Site.Language.Lang }}
 
     <main class="content-wrapper">
+        <nav class="menu">
+            <ul>
+                {{ range site.Menus.main }}
+                <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+                {{ end }}
+            </ul>
+        </nav>
         <article class="content-container">
 
 {{ block "main" . }}{{ end }}
