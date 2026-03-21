@@ -18,8 +18,8 @@
   --radius: 8px;
   --highlight-color: rgba(137, 137, 222, 0.3);
   --font-family-base: "Newsreader";
-  --font-size-base: 20px;
-  --content-max-inline-size: 620px;
+  --font-size-base: 18px;
+  --content-max-inline-size: 768px;
   --content-padding: 20px;
   --focus-color: #0066cc;
   --muted-text-color: #666666;
@@ -27,7 +27,9 @@
 
 body,
 .toc-container {
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 header h1 a {
@@ -160,7 +162,9 @@ body {
   margin-inline: 0;
   padding-block: 0;
   padding-inline: 0;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 code {
@@ -185,6 +189,19 @@ pre code {
   border-radius: var(--radius);
   overflow-x: auto;
   word-break: break-all;
+}
+
+.menu ul {
+  color: #0077b6;
+  display: flex;
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+}
+
+.menu a {
+  text-decoration: none;
+  font-weight: 500;
 }
 
 h1:hover .anchor,
@@ -256,7 +273,9 @@ header > div {
   }
 
   .toc-container {
-    inset-inline-start: calc(50% - (var(--content-max-inline-size) / 2) - 270px);
+    inset-inline-start: calc(
+      50% - (var(--content-max-inline-size) / 2) - 270px
+    );
   }
 }
 
@@ -339,7 +358,9 @@ p a:hover {
   cursor: pointer;
   inset: 0;
   background-color: var(--bg-color);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
   border-radius: 34px;
   border: 1px solid var(--text-color);
 }
@@ -352,7 +373,9 @@ p a:hover {
   inset-inline-start: 2px;
   inset-block-end: 2px;
   background-color: var(--text-color);
-  transition: inset-inline-start 0.2s ease, background-color 0.2s ease;
+  transition:
+    inset-inline-start 0.2s ease,
+    background-color 0.2s ease;
   border-radius: 50%;
 }
 
