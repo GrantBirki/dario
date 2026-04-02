@@ -31,12 +31,14 @@ home_html="$output_dir/index.html"
 post_html="$output_dir/posts/first/index.html"
 absolute_og_html="$output_dir/posts/absolute-og/index.html"
 no_anchor_html="$output_dir/posts/no-anchors/index.html"
+template_literal_og_html="$output_dir/posts/template-literal-og/index.html"
 css_file="$(ls "$output_dir"/css/*.css | head -n1)"
 
 [[ -f "$home_html" ]] || die "expected fixture homepage output at $home_html"
 [[ -f "$post_html" ]] || die "expected fixture post output at $post_html"
 [[ -f "$absolute_og_html" ]] || die "expected fixture absolute-og output at $absolute_og_html"
 [[ -f "$no_anchor_html" ]] || die "expected fixture no-anchors output at $no_anchor_html"
+[[ -f "$template_literal_og_html" ]] || die "expected template-literal-og output at $template_literal_og_html"
 [[ -f "$css_file" ]] || die "expected processed CSS output under $output_dir/css"
 
 if ! grep -Fq "<h1>Home <em>Post</em></h1>" "$home_html"; then
@@ -97,6 +99,22 @@ fi
 
 if ! grep -Fq '<meta property="og:image" content="https://cdn.example.com/og.png">' "$absolute_og_html"; then
   die "absolute ogImage URL should be passed through without baseURL concatenation"
+fi
+
+if ! grep -Fq '<meta property="og:title" content="{{ .Site.Title }}">' "$template_literal_og_html"; then
+  die "template-like OG title should remain literal in HTML meta tags"
+fi
+
+if ! grep -Fq '<meta property="og:description" content="{{ now.Year }}">' "$template_literal_og_html"; then
+  die "template-like OG description should remain literal in HTML meta tags"
+fi
+
+if ! grep -Fq "{{ .Site.Title }}" "$output_dir"/og/*.svg; then
+  die "generated OG SVG should preserve literal template delimiters in the title"
+fi
+
+if ! grep -Fq "{{ now.Year }}" "$output_dir"/og/*.svg; then
+  die "generated OG SVG should preserve literal template delimiters in the description"
 fi
 
 if ! grep -Fq "url(../fonts/Newsreader.woff2)" "$css_file"; then
