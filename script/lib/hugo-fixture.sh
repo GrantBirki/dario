@@ -77,4 +77,14 @@ date = 2025-02-26T00:00:00Z
 
 This post should not render a heading anchor.
 EOF
+
+  cat > "$site_dir/content/posts/template-literal-og.md" <<'EOF'
++++
+title = "{{ .Site.Title }}"
+description = "{{ now.Year }}"
+date = 2025-02-27T00:00:00Z
++++
+
+This post verifies that Open Graph SVG generation does not execute template actions from content.
+EOF
 }

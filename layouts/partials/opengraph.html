@@ -36,7 +36,8 @@
     </svg>
     ` ($title | htmlEscape) ($description | htmlEscape) | safeHTML }}
 
-{{- $generatedSVG := resources.FromString $uniqueName $svg | resources.ExecuteAsTemplate $uniqueName . -}}
+{{- /* Do not execute the generated SVG as a template: title/description can be content-derived. */ -}}
+{{- $generatedSVG := resources.FromString $uniqueName $svg -}}
 
 {{- /* Determine which image URL to use */ -}}
 {{- $ogImageURL := $generatedSVG.Permalink }}
