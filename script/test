@@ -61,6 +61,14 @@ if ! grep -Fq 'href="#details"' "$post_html"; then
   die "expected heading anchor link for rendered markdown heading"
 fi
 
+if ! grep -Fq 'aria-label="Permalink to Details"' "$post_html"; then
+  die "heading anchor should have an accessible name derived from the heading"
+fi
+
+if ! grep -Fq '<span aria-hidden="true">#</span>' "$post_html"; then
+  die "heading anchor marker should be hidden from assistive technology"
+fi
+
 if grep -Fq 'href="#without-anchor"' "$no_anchor_html"; then
   die "disableAnchoredHeadings should disable heading anchor links"
 fi
@@ -71,6 +79,38 @@ fi
 
 if grep -q "footnotes" "$home_html"; then
   die "homepage without footnotes should not include footnotes script"
+fi
+
+if [[ "$(grep -Fc 'rel="stylesheet"' "$home_html")" -ne 1 ]]; then
+  die "fixture should load one bundled theme stylesheet"
+fi
+
+if ! grep -Fq 'Inline <code>vendor/cache</code> code' "$post_html"; then
+  die "inline code should render independently from fenced code blocks"
+fi
+
+if ! grep -Fq 'class="chroma"' "$post_html"; then
+  die "fenced code blocks should use class-based Chroma output"
+fi
+
+if ! grep -Fq 'class="language-bash"' "$post_html"; then
+  die "Bash fence language metadata should be preserved"
+fi
+
+if ! grep -Fq 'class="language-yaml"' "$post_html"; then
+  die "YAML fence language metadata should be preserved"
+fi
+
+if ! grep -Fq 'class="ln"' "$post_html" || ! grep -Fq 'class="line hl"' "$post_html"; then
+  die "fenced code block highlighting options should be preserved"
+fi
+
+if grep -Eq '<(div|pre|code|span)[^>]* style=' "$post_html"; then
+  die "Chroma output should not contain inline styles"
+fi
+
+if ! grep -Fq 'deliberately_long_path' "$post_html"; then
+  die "fixture should contain a deliberately long highlighted line"
 fi
 
 if ! grep -Fq "fonts/Newsreader.woff2" "$home_html"; then
@@ -127,6 +167,30 @@ fi
 
 if grep -Fq "url(/fonts/" "$css_file"; then
   die "CSS should not use root-absolute font URLs"
+fi
+
+if ! grep -Fq '.dark-mode-off:root' "$css_file" || ! grep -Fq '#cf222e' "$css_file"; then
+  die "bundled CSS should include the scoped GitHub light syntax palette"
+fi
+
+if ! grep -Fq '.dark-mode-on:root' "$css_file" || ! grep -Fq '#ff7b72' "$css_file"; then
+  die "bundled CSS should include the scoped GitHub dark syntax palette"
+fi
+
+if ! grep -Fq 'prefers-color-scheme:light' "$css_file" || ! grep -Fq 'prefers-color-scheme:dark' "$css_file"; then
+  die "bundled syntax palettes should follow the system color scheme"
+fi
+
+if ! grep -Fq 'overflow-x:auto' "$css_file" || ! grep -Fq 'white-space:pre' "$css_file"; then
+  die "code block panels should preserve long lines and scroll horizontally"
+fi
+
+if ! grep -Fq 'word-break:normal' "$css_file" || ! grep -Fq 'overflow-wrap:normal' "$css_file"; then
+  die "code block panels should not break highlighted tokens"
+fi
+
+if ! grep -Fq 'pre:focus-visible' "$css_file"; then
+  die "scrollable code blocks should expose a visible keyboard focus state"
 fi
 
 if ! grep -Fq "../fonts/Newsreader.woff2" "$output_dir"/og/*.svg; then

@@ -89,22 +89,25 @@ Add the following to your `config.toml`:
 [module]
   [[module.imports]]
     path = "github.com/GrantBirki/dario"
-    version = "main"
 ```
 
 Note that there's no `theme = "dario"` in this case. If you already have this in your `config.toml`, please remove it.
 
-Fetch the theme:
+Review the Dario commit you intend to consume, then fetch it by its full 40-character revision. This example points to a known commit; replace it only after reviewing a newer revision:
 
 ```bash
-hugo mod get github.com/GrantBirki/dario@main
+DARIO_SHA="b0fa756c824bc7b9e4d64b75711b8742e44c7dc0"
+hugo mod get "github.com/GrantBirki/dario@${DARIO_SHA}"
 hugo mod tidy
 ```
 
-To upgrade to the latest version of the theme:
+Hugo records the commit as an immutable pseudo-version in `go.mod`, while `go.sum` authenticates the downloaded module content. The import in `config.toml` intentionally has no mutable version selector because `go.mod` is the dependency authority.
+
+To upgrade the theme, review a newer Dario commit and run the same targeted update with its full revision:
 
 ```bash
-hugo mod get -u github.com/GrantBirki/dario@main
+DARIO_SHA="REPLACE_WITH_A_REVIEWED_40_CHARACTER_COMMIT_SHA"
+hugo mod get "github.com/GrantBirki/dario@${DARIO_SHA}"
 hugo mod tidy
 ```
 

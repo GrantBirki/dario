@@ -25,8 +25,9 @@
     <link rel="preload" href="{{ "fonts/Newsreader.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
     {{- end }}
 
-    {{- $defaultCSS := resources.Get "css/default.css" | minify | fingerprint }}
-    <link rel="stylesheet" href="{{ $defaultCSS.RelPermalink }}" integrity="{{ $defaultCSS.Data.Integrity }}">
+    {{- $styles := slice (resources.Get "css/default.css") (resources.Get "css/syntax.css") -}}
+    {{- $themeCSS := $styles | resources.Concat "css/theme.css" | minify | fingerprint }}
+    <link rel="stylesheet" href="{{ $themeCSS.RelPermalink }}" integrity="{{ $themeCSS.Data.Integrity }}">
     {{- with resources.Get "css/custom.css" }}
         {{- with . | minify | fingerprint }}
     <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">

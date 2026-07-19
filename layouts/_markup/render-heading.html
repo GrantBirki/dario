@@ -1,3 +1,3 @@
 {{- $disableAnchoredHeadings := .Page.Param "disableAnchoredHeadings" -}}
 {{- $anchor := .Anchor | safeURL -}}
-<h{{ .Level }} id="{{ .Anchor }}">{{ .Text }}{{- if not $disableAnchoredHeadings -}}<a class="anchor" aria-hidden="true" href="#{{ $anchor }}">#</a>{{- end -}}</h{{ .Level }}>
+<h{{ .Level }} id="{{ .Anchor }}">{{ .Text }}{{- if not $disableAnchoredHeadings -}}<a class="anchor" aria-label="Permalink to {{ .PlainText }}" href="#{{ $anchor }}"><span aria-hidden="true">#</span></a>{{- end -}}</h{{ .Level }}>

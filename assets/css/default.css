@@ -55,7 +55,8 @@ header h1 a {
   --subscribe-button-text: #141413;
   --invert-percentage: 100%;
   --code-bg: rgb(55, 56, 62);
-  --hljs-bg: rgb(46, 46, 51);
+  --code-block-bg: #0d1117;
+  --code-block-border: #30363d;
   --muted-text-color: #b3b3b3;
 }
 
@@ -77,7 +78,8 @@ header h1 a {
   --subscribe-button-text: #f0efea;
   --invert-percentage: 0%;
   --code-bg: rgb(223, 223, 223);
-  --hljs-bg: rgb(28, 29, 33);
+  --code-block-bg: #f7f7f7;
+  --code-block-border: #d0d7de;
   --muted-text-color: #666666;
 }
 
@@ -100,7 +102,8 @@ header h1 a {
     --subscribe-button-text: #141413;
     --invert-percentage: 100%;
     --code-bg: rgb(55, 56, 62);
-    --hljs-bg: rgb(46, 46, 51);
+    --code-block-bg: #0d1117;
+    --code-block-border: #30363d;
     --muted-text-color: #b3b3b3;
   }
 }
@@ -124,7 +127,8 @@ header h1 a {
     --subscribe-button-text: #f0efea;
     --invert-percentage: 0%;
     --code-bg: rgb(223, 223, 223);
-    --hljs-bg: rgb(28, 29, 33);
+    --code-block-bg: #f7f7f7;
+    --code-block-border: #d0d7de;
     --muted-text-color: #666666;
   }
 }
@@ -176,15 +180,36 @@ code {
   font-family: menlo, Consolas, ui-monospace, monospace;
 }
 
-pre code {
-  display: block;
-  margin-block: auto;
+pre {
+  box-sizing: border-box;
+  margin-block: 1.25em;
   margin-inline: 0;
-  color: rgb(213, 213, 214);
-  background: var(--hljs-bg) !important;
+  padding: 1rem;
+  background: var(--code-block-bg);
+  border: 1px solid var(--code-block-border);
   border-radius: var(--radius);
   overflow-x: auto;
-  word-break: break-all;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+pre:focus-visible {
+  outline: 3px solid var(--focus-color);
+  outline-offset: 2px;
+}
+
+pre code {
+  display: block;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  white-space: inherit;
+  overflow-wrap: inherit;
+  word-break: inherit;
 }
 
 h1:hover .anchor,
@@ -192,17 +217,25 @@ h2:hover .anchor,
 h3:hover .anchor,
 h4:hover .anchor,
 h5:hover .anchor,
-h6:hover .anchor {
-  display: inline-flex;
-  color: var(--text-color);
-  margin-inline-start: 8px;
-  font-weight: 500;
-  user-select: none;
+h6:hover .anchor,
+.anchor:hover {
   opacity: 0.5;
 }
 
 .anchor {
-  display: none;
+  display: inline-flex;
+  color: var(--text-color);
+  margin-inline-start: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  user-select: none;
+  opacity: 0;
+}
+
+.anchor:focus-visible {
+  opacity: 1;
+  outline: 3px solid var(--focus-color);
+  outline-offset: 2px;
 }
 
 a {
