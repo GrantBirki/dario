@@ -30,6 +30,19 @@ hugo_installed_semver() {
   normalize_semver "$(hugo version | awk '{print $2}')"
 }
 
+verify_vendored_hugo_packages() {
+  require_cmd shasum
+
+  local checksum_file="$HUGO_VENDOR_BIN_DIR/SHA256SUMS"
+  [[ -f "$checksum_file" ]] || die "missing vendored Hugo checksum file: $checksum_file"
+
+  echo -e "${BLUE}Verifying vendored Hugo packages${OFF}"
+  (
+    cd "$HUGO_VENDOR_BIN_DIR"
+    shasum -a 256 -c "$(basename "$checksum_file")"
+  ) || die "vendored Hugo package checksum verification failed"
+}
+
 install_vendored_hugo_linux() {
   require_cmd dpkg
 
@@ -76,6 +89,8 @@ install_hugo_for_ci() {
   if [[ -n "$installed_semver" ]]; then
     echo -e "${BLUE}Detected preinstalled Hugo:${OFF} ${PURPLE}${installed_semver}${OFF}"
   fi
+
+  verify_vendored_hugo_packages
 
   case "$OSTYPE" in
     linux-gnu*)

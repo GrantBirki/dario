@@ -49,6 +49,21 @@ Hello from the fixture post.[^1]
 
 Some text under a heading.
 
+Inline `vendor/cache` code should keep its compact pill styling.
+
+```bash {linenos=inline hl_lines="2"}
+# Build without downloading modules.
+HUGO_MODULE_PROXY=off hugo --minify
+readonly deliberately_long_path="/this/is/a/deliberately/long/path/that/should/scroll/horizontally/instead/of/breaking/highlighted/tokens/across/the/code/block"
+```
+
+```yaml
+# Pin the reviewed theme revision in go.mod.
+module:
+  imports:
+    - path: github.com/GrantBirki/dario
+```
+
 [^1]: Fixture footnote text.
 EOF
 
