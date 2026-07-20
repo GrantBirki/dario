@@ -46,6 +46,11 @@
     <script src="{{ $darkmodeJS.RelPermalink }}" integrity="{{ $darkmodeJS.Data.Integrity }}" defer></script>
     {{- end }}
 
+    {{- if partial "copy-markdown/enabled.html" . }}
+    {{- $copyMarkdownJS := resources.Get "js/copy-markdown.js" | minify | fingerprint }}
+    <script src="{{ $copyMarkdownJS.RelPermalink }}" integrity="{{ $copyMarkdownJS.Data.Integrity }}" defer></script>
+    {{- end }}
+
     {{- with .Content }}
         {{- if or (in . "id=\"fnref") (in . "class=\"footnote-ref\"") }}
             {{- $footnotesJS := resources.Get "js/footnotes.js" | minify | fingerprint }}

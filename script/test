@@ -33,6 +33,7 @@ absolute_og_html="$output_dir/posts/absolute-og/index.html"
 no_anchor_html="$output_dir/posts/no-anchors/index.html"
 template_literal_og_html="$output_dir/posts/template-literal-og/index.html"
 css_file="$(ls "$output_dir"/css/*.css | head -n1)"
+copy_markdown_js_file="$(ls "$output_dir"/js/copy-markdown*.js | head -n1)"
 
 [[ -f "$home_html" ]] || die "expected fixture homepage output at $home_html"
 [[ -f "$post_html" ]] || die "expected fixture post output at $post_html"
@@ -40,6 +41,7 @@ css_file="$(ls "$output_dir"/css/*.css | head -n1)"
 [[ -f "$no_anchor_html" ]] || die "expected fixture no-anchors output at $no_anchor_html"
 [[ -f "$template_literal_og_html" ]] || die "expected template-literal-og output at $template_literal_og_html"
 [[ -f "$css_file" ]] || die "expected processed CSS output under $output_dir/css"
+[[ -f "$copy_markdown_js_file" ]] || die "expected processed copy Markdown JavaScript under $output_dir/js"
 
 if ! grep -Fq "<h1>Home <em>Post</em></h1>" "$home_html"; then
   die "homepage title markdown did not render as expected"
@@ -55,6 +57,38 @@ fi
 
 if ! grep -Fq "<h1>First <em>Post</em></h1>" "$post_html"; then
   die "single post title markdown did not render as expected"
+fi
+
+if ! grep -Fq 'class="copy-markdown-button"' "$home_html" || ! grep -Fq 'class="copy-markdown-button"' "$post_html"; then
+  die "global copy Markdown configuration should enable the control on home and post pages"
+fi
+
+if ! grep -Fq '<span class="copy-markdown-label" aria-live="polite">Copy Markdown</span>' "$post_html"; then
+  die "copy Markdown control should expose visible status text to assistive technology"
+fi
+
+if ! grep -Fq 'class="copy-markdown-icon"' "$post_html" || ! grep -Fq 'aria-hidden="true"' "$post_html"; then
+  die "copy Markdown icon should be decorative"
+fi
+
+if ! grep -Fq 'type="application/json" id="copy-markdown-source"' "$post_html"; then
+  die "copy Markdown control should include a JSON-encoded source payload"
+fi
+
+if ! grep -Fq '# First Post' "$post_html" || ! grep -Fq 'Hello from the fixture post.' "$post_html"; then
+  die "post copy payload should include the plain title and raw Markdown body"
+fi
+
+if ! grep -Fq '# Home Post' "$home_html" || ! grep -Fq '## Posts' "$home_html" || ! grep -Fq -- '- [First Post](https://example.org/blog/posts/first/)' "$home_html"; then
+  die "home copy payload should include its content and generated post links"
+fi
+
+if ! grep -Fq 'navigator.clipboard' "$copy_markdown_js_file" || ! grep -Fq 'execCommand("copy")' "$copy_markdown_js_file"; then
+  die "copy Markdown JavaScript should include Clipboard API and compatibility fallback paths"
+fi
+
+if ! grep -Fq '.copy-markdown-button:focus-visible' "$css_file"; then
+  die "copy Markdown control should expose a visible keyboard focus state"
 fi
 
 if ! grep -Fq 'href="#details"' "$post_html"; then
@@ -204,5 +238,45 @@ fi
 if ! grep -q "A &amp; B" "$output_dir"/og/*.svg; then
   die "OG SVG is missing escaped description content"
 fi
+
+assert_copy_markdown_mode() {
+  local mode="$1"
+  local expect_home="$2"
+  local expect_post="$3"
+  local mode_site="$work_dir/site-$mode"
+  local mode_output="$work_dir/public-$mode"
+
+  create_hugo_fixture_site "$mode_site" "$DIR" "$mode"
+  hugo --quiet --source "$mode_site" --destination "$mode_output" --panicOnWarning
+
+  if [[ "$expect_home" == "true" ]]; then
+    grep -Fq 'class="copy-markdown-button"' "$mode_output/index.html" || die "$mode mode should enable copy Markdown on the homepage"
+    grep -Fq '/js/copy-markdown.' "$mode_output/index.html" || die "$mode mode homepage should load copy Markdown JavaScript"
+  elif grep -Fq 'class="copy-markdown-button"' "$mode_output/index.html"; then
+    die "$mode mode should disable copy Markdown on the homepage"
+  elif grep -Fq '/js/copy-markdown.' "$mode_output/index.html"; then
+    die "$mode mode homepage should not load unused copy Markdown JavaScript"
+  fi
+
+  if [[ "$expect_post" == "true" ]]; then
+    grep -Fq 'class="copy-markdown-button"' "$mode_output/posts/first/index.html" || die "$mode mode should enable copy Markdown on post pages"
+    grep -Fq '/js/copy-markdown.' "$mode_output/posts/first/index.html" || die "$mode mode posts should load copy Markdown JavaScript"
+  elif grep -Fq 'class="copy-markdown-button"' "$mode_output/posts/first/index.html"; then
+    die "$mode mode should disable copy Markdown on post pages"
+  elif grep -Fq '/js/copy-markdown.' "$mode_output/posts/first/index.html"; then
+    die "$mode mode posts should not load unused copy Markdown JavaScript"
+  fi
+}
+
+assert_copy_markdown_mode home true false
+assert_copy_markdown_mode posts false true
+assert_copy_markdown_mode off false false
+
+landing_site="$work_dir/site-landing"
+landing_output="$work_dir/public-landing"
+create_hugo_fixture_site "$landing_site" "$DIR" global false
+hugo --quiet --source "$landing_site" --destination "$landing_output" --panicOnWarning
+grep -Fq 'class="page-meta page-meta-home"' "$landing_output/index.html" || die "standard landing page should render the copy Markdown control"
+grep -Fq '# Home Post' "$landing_output/index.html" || die "standard landing page should include its Markdown payload"
 
 echo -e "${GREEN}Fixture tests passed${OFF}"
