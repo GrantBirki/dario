@@ -5,11 +5,11 @@
 
     {{- if or (isset .Params "date") $copyMarkdownEnabled }}
     <div class="page-meta">
-        {{- if $copyMarkdownEnabled }}
-{{ partial "copy-markdown/button.html" . }}
-        {{- end }}
         {{- if isset .Params "date" }}
         <p class="author-date">{{ printf `<time datetime="%s">%s</time>` (.Date.Format "2006-01-02T15:04:05Z07:00") (.Date.Format "January 2, 2006") | safeHTML }}</p>
+        {{- end }}
+        {{- if $copyMarkdownEnabled }}
+{{ partial "copy-markdown/button.html" . }}
         {{- end }}
     </div>
     {{- end }}
