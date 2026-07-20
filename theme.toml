@@ -19,6 +19,7 @@ features = [
   "blog",
   "copy-markdown",
   "opengraph",
+  "posts-link",
   "theme-toggle"
 ]
 

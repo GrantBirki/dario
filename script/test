@@ -29,6 +29,7 @@ hugo \
 
 home_html="$output_dir/index.html"
 post_html="$output_dir/posts/first/index.html"
+posts_html="$output_dir/posts/index.html"
 absolute_og_html="$output_dir/posts/absolute-og/index.html"
 no_anchor_html="$output_dir/posts/no-anchors/index.html"
 template_literal_og_html="$output_dir/posts/template-literal-og/index.html"
@@ -37,6 +38,7 @@ copy_markdown_js_file="$(ls "$output_dir"/js/copy-markdown*.js | head -n1)"
 
 [[ -f "$home_html" ]] || die "expected fixture homepage output at $home_html"
 [[ -f "$post_html" ]] || die "expected fixture post output at $post_html"
+[[ -f "$posts_html" ]] || die "expected fixture posts output at $posts_html"
 [[ -f "$absolute_og_html" ]] || die "expected fixture absolute-og output at $absolute_og_html"
 [[ -f "$no_anchor_html" ]] || die "expected fixture no-anchors output at $no_anchor_html"
 [[ -f "$template_literal_og_html" ]] || die "expected template-literal-og output at $template_literal_og_html"
@@ -62,6 +64,28 @@ fi
 if ! grep -Fq 'class="copy-markdown-button"' "$home_html" || ! grep -Fq 'class="copy-markdown-button"' "$post_html"; then
   die "global copy Markdown configuration should enable the control on home and post pages"
 fi
+
+assert_copy_button_before_date() {
+  local page="$1"
+  local copy_line
+  local date_line
+
+  copy_line="$(grep -n -m1 'class="copy-markdown-button"' "$page")"
+  copy_line="${copy_line%%:*}"
+  date_line="$(grep -n -m1 'class="author-date"' "$page")"
+  date_line="${date_line%%:*}"
+
+  [[ "$copy_line" -lt "$date_line" ]] || die "copy Markdown control should render above the date in $page"
+}
+
+assert_copy_button_before_date "$home_html"
+assert_copy_button_before_date "$post_html"
+
+for page in "$home_html" "$post_html" "$posts_html"; do
+  if ! grep -Fq '<a class="header-posts-link" href="/blog/posts/">posts</a>' "$page"; then
+    die "enabled posts link should render in the header on $page"
+  fi
+done
 
 if ! grep -Fq '<span class="copy-markdown-label" aria-live="polite">Copy Markdown</span>' "$post_html"; then
   die "copy Markdown control should expose visible status text to assistive technology"
@@ -89,6 +113,18 @@ fi
 
 if ! grep -Fq '.copy-markdown-button:focus-visible' "$css_file"; then
   die "copy Markdown control should expose a visible keyboard focus state"
+fi
+
+if ! grep -Fq -- '--control-border-color:#85827b' "$css_file" || ! grep -Fq -- '--control-bg-color:rgba(255, 255, 255, 0.35)' "$css_file"; then
+  die "copy Markdown control should have a distinct light-mode edge and surface"
+fi
+
+if ! grep -Fq '.page-meta{display:flex;flex-direction:column;align-items:flex-start' "$css_file"; then
+  die "page metadata should stack the copy Markdown control above the date"
+fi
+
+if ! grep -Fq '.header-posts-link:focus-visible' "$css_file"; then
+  die "posts header link should expose a visible keyboard focus state"
 fi
 
 if ! grep -Fq 'href="#details"' "$post_html"; then
@@ -278,5 +314,40 @@ create_hugo_fixture_site "$landing_site" "$DIR" global false
 hugo --quiet --source "$landing_site" --destination "$landing_output" --panicOnWarning
 grep -Fq 'class="page-meta page-meta-home"' "$landing_output/index.html" || die "standard landing page should render the copy Markdown control"
 grep -Fq '# Home Post' "$landing_output/index.html" || die "standard landing page should include its Markdown payload"
+
+posts_link_off_site="$work_dir/site-posts-link-off"
+posts_link_off_output="$work_dir/public-posts-link-off"
+create_hugo_fixture_site "$posts_link_off_site" "$DIR" global true false
+hugo --quiet --source "$posts_link_off_site" --destination "$posts_link_off_output" --panicOnWarning
+if grep -Rq 'class="header-posts-link"' "$posts_link_off_output"; then
+  die "disabled posts link should not render on any page"
+fi
+
+multilingual_site="$work_dir/site-multilingual"
+multilingual_output="$work_dir/public-multilingual"
+create_hugo_fixture_site "$multilingual_site" "$DIR"
+cat >> "$multilingual_site/hugo.toml" <<'EOF'
+
+[languages.en]
+  languageCode = "en-us"
+  weight = 1
+
+[languages.fr]
+  languageCode = "fr-fr"
+  weight = 2
+EOF
+cat > "$multilingual_site/content/posts/first.fr.md" <<'EOF'
++++
+title = "Premier article"
+description = "Article de test"
+date = 2025-02-24T00:00:00Z
++++
+
+Contenu de test.
+EOF
+hugo --quiet --source "$multilingual_site" --destination "$multilingual_output" --panicOnWarning
+if ! grep -Fq '<a class="header-posts-link" href="/blog/fr/posts/">posts</a>' "$multilingual_output/fr/posts/first/index.html"; then
+  die "posts header link should include the active language path"
+fi
 
 echo -e "${GREEN}Fixture tests passed${OFF}"
