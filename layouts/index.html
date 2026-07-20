@@ -6,10 +6,10 @@
     <h1>{{ .Title | .RenderString }}</h1>
     <h4>{{ .Params.description }}</h4>
     <div class="page-meta">
-        <p class="author-date"><time datetime="{{ .Date }}">{{ .Date.Format "January 2, 2006" }}</time> - {{ .Params.author }}</p>
         {{- if $copyMarkdownEnabled }}
 {{ partial "copy-markdown/button.html" $home }}
         {{- end }}
+        <p class="author-date"><time datetime="{{ .Date }}">{{ .Date.Format "January 2, 2006" }}</time> - {{ .Params.author }}</p>
     </div>
 
 {{ .Content }}

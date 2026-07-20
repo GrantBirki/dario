@@ -7,11 +7,12 @@ create_hugo_fixture_site() {
   local theme_dir="$2"
   local copy_markdown_mode="${3:-global}"
   local home_page_is_post="${4:-true}"
+  local show_posts_link="${5:-true}"
 
   mkdir -p "$site_dir/content/posts" "$site_dir/themes"
   ln -s "$theme_dir" "$site_dir/themes/dario"
 
-  cat > "$site_dir/hugo.toml" <<'EOF'
+  cat > "$site_dir/hugo.toml" <<EOF
 baseURL = "https://example.org/blog/"
 languageCode = "en-us"
 title = "Fixture Site"
@@ -19,6 +20,7 @@ theme = "dario"
 
 [params]
   description = "Fixture description"
+  showPostsLink = $show_posts_link
 
 [params.author]
   name = "Fixture Author"

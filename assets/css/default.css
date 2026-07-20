@@ -58,6 +58,8 @@ header h1 a {
   --code-block-bg: #0d1117;
   --code-block-border: #30363d;
   --muted-text-color: #b3b3b3;
+  --control-border-color: #444;
+  --control-bg-color: transparent;
 }
 
 .dark-mode-off:root {
@@ -81,6 +83,8 @@ header h1 a {
   --code-block-bg: #f7f7f7;
   --code-block-border: #d0d7de;
   --muted-text-color: #666666;
+  --control-border-color: #85827b;
+  --control-bg-color: rgba(255, 255, 255, 0.35);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -105,6 +109,8 @@ header h1 a {
     --code-block-bg: #0d1117;
     --code-block-border: #30363d;
     --muted-text-color: #b3b3b3;
+    --control-border-color: #444;
+    --control-bg-color: transparent;
   }
 }
 
@@ -130,6 +136,8 @@ header h1 a {
     --code-block-bg: #f7f7f7;
     --code-block-border: #d0d7de;
     --muted-text-color: #666666;
+    --control-border-color: #85827b;
+    --control-bg-color: rgba(255, 255, 255, 0.35);
   }
 }
 
@@ -320,8 +328,13 @@ header h1 a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  inline-size: 250px;
+  inline-size: 100%;
   padding-block-start: 2px;
+}
+
+header h1 {
+  flex: 0 1 250px;
+  min-inline-size: 0;
 }
 
 header h1 a {
@@ -345,6 +358,23 @@ p a:hover {
   opacity: 1;
   pointer-events: auto;
   transition: opacity 0.2s ease;
+}
+
+.header-posts-link {
+  color: var(--muted-text-color);
+  font-size: 0.75em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.header-posts-link:hover {
+  color: var(--text-color);
+}
+
+.header-posts-link:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 3px;
 }
 
 /* Toggle Switch Styles */
@@ -479,8 +509,8 @@ center {
 
 .page-meta {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.75em;
   margin-block-start: 2em;
 }
@@ -500,8 +530,8 @@ center {
   min-block-size: 2.25em;
   padding: 0.35em 0.65em;
   color: var(--muted-text-color);
-  background-color: transparent;
-  border: 1px solid var(--border-color);
+  background-color: var(--control-bg-color);
+  border: 1px solid var(--control-border-color);
   border-radius: 0.5em;
   font: inherit;
   font-size: 0.8em;

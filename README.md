@@ -157,6 +157,13 @@ By default, the theme shows a toggle for switching between light and dark modes.
 
 You can also set it to `'light'` or `'dark'` to keep it fixed. The default behavior is to have it set as `'toggle'` which displays a toggle and on first page load it defaults to the user's system preference.
 
+The lowercase `posts` link in the header is disabled by default. Enable it on every page with:
+
+```toml
+[params]
+  showPostsLink = true
+```
+
 The optional Copy Markdown control is disabled by default. Enable it on both the landing page and post pages with:
 
 ```toml
