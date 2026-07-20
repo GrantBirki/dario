@@ -5,7 +5,7 @@
         </h1>
         <div class="header-controls">
             {{- if .Site.Params.showPostsLink }}
-            <a class="header-posts-link" href="{{ "posts/" | relURL }}">posts</a>
+            <a class="header-posts-link" href="{{ "posts/" | relLangURL }}">posts</a>
             {{- end }}
             <div class="toggle-switch">
                 <input type="checkbox" id="darkModeToggle" class="toggle-input" aria-label="Toggle dark mode">

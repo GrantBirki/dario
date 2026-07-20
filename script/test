@@ -323,4 +323,31 @@ if grep -Rq 'class="header-posts-link"' "$posts_link_off_output"; then
   die "disabled posts link should not render on any page"
 fi
 
+multilingual_site="$work_dir/site-multilingual"
+multilingual_output="$work_dir/public-multilingual"
+create_hugo_fixture_site "$multilingual_site" "$DIR"
+cat >> "$multilingual_site/hugo.toml" <<'EOF'
+
+[languages.en]
+  languageCode = "en-us"
+  weight = 1
+
+[languages.fr]
+  languageCode = "fr-fr"
+  weight = 2
+EOF
+cat > "$multilingual_site/content/posts/first.fr.md" <<'EOF'
++++
+title = "Premier article"
+description = "Article de test"
+date = 2025-02-24T00:00:00Z
++++
+
+Contenu de test.
+EOF
+hugo --quiet --source "$multilingual_site" --destination "$multilingual_output" --panicOnWarning
+if ! grep -Fq '<a class="header-posts-link" href="/blog/fr/posts/">posts</a>' "$multilingual_output/fr/posts/first/index.html"; then
+  die "posts header link should include the active language path"
+fi
+
 echo -e "${GREEN}Fixture tests passed${OFF}"
