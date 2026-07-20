@@ -65,7 +65,7 @@ if ! grep -Fq 'class="copy-markdown-button"' "$home_html" || ! grep -Fq 'class="
   die "global copy Markdown configuration should enable the control on home and post pages"
 fi
 
-assert_copy_button_before_date() {
+assert_date_before_copy_button() {
   local page="$1"
   local copy_line
   local date_line
@@ -75,17 +75,21 @@ assert_copy_button_before_date() {
   date_line="$(grep -n -m1 'class="author-date"' "$page")"
   date_line="${date_line%%:*}"
 
-  [[ "$copy_line" -lt "$date_line" ]] || die "copy Markdown control should render above the date in $page"
+  [[ "$date_line" -lt "$copy_line" ]] || die "copy Markdown control should render below the date in $page"
 }
 
-assert_copy_button_before_date "$home_html"
-assert_copy_button_before_date "$post_html"
+assert_date_before_copy_button "$home_html"
+assert_date_before_copy_button "$post_html"
 
 for page in "$home_html" "$post_html" "$posts_html"; do
   if ! grep -Fq '<a class="header-posts-link" href="/blog/posts/">posts</a>' "$page"; then
     die "enabled posts link should render in the header on $page"
   fi
 done
+
+if ! grep -Fq '<span class="header-control-separator" aria-hidden="true"></span>' "$home_html"; then
+  die "posts header link should include a decorative separator before the theme toggle"
+fi
 
 if ! grep -Fq '<span class="copy-markdown-label" aria-live="polite">Copy Markdown</span>' "$post_html"; then
   die "copy Markdown control should expose visible status text to assistive technology"
@@ -119,12 +123,16 @@ if ! grep -Fq -- '--control-border-color:#85827b' "$css_file" || ! grep -Fq -- '
   die "copy Markdown control should have a distinct light-mode edge and surface"
 fi
 
-if ! grep -Fq '.page-meta{display:flex;flex-direction:column;align-items:flex-start' "$css_file"; then
-  die "page metadata should stack the copy Markdown control above the date"
+if ! grep -Fq '.page-meta{display:flex;flex-direction:column;align-items:flex-start;gap:1em;margin-block:1.5em}' "$css_file"; then
+  die "page metadata should use even vertical spacing"
 fi
 
 if ! grep -Fq '.header-posts-link:focus-visible' "$css_file"; then
   die "posts header link should expose a visible keyboard focus state"
+fi
+
+if ! grep -Fq 'font-size:.85em' "$css_file" || ! grep -Fq '.header-control-separator' "$css_file"; then
+  die "posts header controls should include the larger label and separator styling"
 fi
 
 if ! grep -Fq 'href="#details"' "$post_html"; then
@@ -319,8 +327,8 @@ posts_link_off_site="$work_dir/site-posts-link-off"
 posts_link_off_output="$work_dir/public-posts-link-off"
 create_hugo_fixture_site "$posts_link_off_site" "$DIR" global true false
 hugo --quiet --source "$posts_link_off_site" --destination "$posts_link_off_output" --panicOnWarning
-if grep -Rq 'class="header-posts-link"' "$posts_link_off_output"; then
-  die "disabled posts link should not render on any page"
+if grep -Rq 'class="header-posts-link"' "$posts_link_off_output" || grep -Rq 'class="header-control-separator"' "$posts_link_off_output"; then
+  die "disabled posts link and separator should not render on any page"
 fi
 
 multilingual_site="$work_dir/site-multilingual"
