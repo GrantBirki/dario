@@ -17,6 +17,7 @@ tags = [
 
 features = [
   "blog",
+  "copy-markdown",
   "opengraph",
   "theme-toggle"
 ]

@@ -157,6 +157,24 @@ By default, the theme shows a toggle for switching between light and dark modes.
 
 You can also set it to `'light'` or `'dark'` to keep it fixed. The default behavior is to have it set as `'toggle'` which displays a toggle and on first page load it defaults to the user's system preference.
 
+The optional Copy Markdown control is disabled by default. Enable it on both the landing page and post pages with:
+
+```toml
+[params.copyMarkdown]
+  enabled = true
+```
+
+To show it on only one page type, set `home` or `posts` explicitly. An omitted page switch defaults to enabled while the feature is enabled globally:
+
+```toml
+[params.copyMarkdown]
+  enabled = true
+  home = true
+  posts = false
+```
+
+The control copies a Markdown heading and the page's raw Markdown body. Landing-page copies also include the generated section and post links, making the result ready to paste into an LLM prompt or another Markdown-aware tool.
+
 The home page shows the top-level section with the most pages by default. To override this, set `mainSections` to select specific sections:
 
 ```toml

@@ -1,0 +1,21 @@
+{{- $source := . -}}
+{{- if .IsHome -}}
+    {{- with .Site.GetPage "_index.md" }}{{- $source = . -}}{{- end -}}
+{{- end -}}
+{{- $title := $source.Title | $source.RenderString | plainify | htmlUnescape -}}
+{{- $markdown := printf "# %s\n" $title -}}
+{{- with strings.TrimSpace $source.RawContent -}}
+    {{- $markdown = printf "%s\n%s\n" $markdown . -}}
+{{- end -}}
+{{- if .IsHome -}}
+    {{- range sort (where .Site.Sections "Section" "in" .Site.MainSections) "Weight" -}}
+        {{- $sectionTitle := .Title | .RenderString | plainify | htmlUnescape -}}
+        {{- $markdown = printf "%s\n## %s\n" $markdown $sectionTitle -}}
+        {{- range where .Site.RegularPages "Section" .Section -}}
+            {{- $pageTitle := .Title | .RenderString | plainify | htmlUnescape -}}
+            {{- $markdown = printf "%s\n- [%s](%s)" $markdown $pageTitle .Permalink -}}
+        {{- end -}}
+        {{- $markdown = printf "%s\n" $markdown -}}
+    {{- end -}}
+{{- end -}}
+{{- return printf "%s\n" (strings.TrimSpace $markdown) -}}

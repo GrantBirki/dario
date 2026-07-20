@@ -1,0 +1,14 @@
+{{- $enabled := false -}}
+{{- with .Site.Params.copyMarkdown -}}
+    {{- if .enabled -}}
+        {{- $enabled = true -}}
+        {{- if $.IsHome -}}
+            {{- if isset . "home" }}{{- $enabled = .home -}}{{- end -}}
+        {{- else if $.IsPage -}}
+            {{- if isset . "posts" }}{{- $enabled = .posts -}}{{- end -}}
+        {{- else -}}
+            {{- $enabled = false -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+{{- return $enabled -}}

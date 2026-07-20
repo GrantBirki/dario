@@ -5,6 +5,8 @@ set -euo pipefail
 create_hugo_fixture_site() {
   local site_dir="$1"
   local theme_dir="$2"
+  local copy_markdown_mode="${3:-global}"
+  local home_page_is_post="${4:-true}"
 
   mkdir -p "$site_dir/content/posts" "$site_dir/themes"
   ln -s "$theme_dir" "$site_dir/themes/dario"
@@ -22,12 +24,51 @@ theme = "dario"
   name = "Fixture Author"
 EOF
 
-  cat > "$site_dir/content/_index.md" <<'EOF'
+  case "$copy_markdown_mode" in
+    global)
+      cat >> "$site_dir/hugo.toml" <<'EOF'
+
+[params.copyMarkdown]
+  enabled = true
+EOF
+      ;;
+    home)
+      cat >> "$site_dir/hugo.toml" <<'EOF'
+
+[params.copyMarkdown]
+  enabled = true
+  home = true
+  posts = false
+EOF
+      ;;
+    posts)
+      cat >> "$site_dir/hugo.toml" <<'EOF'
+
+[params.copyMarkdown]
+  enabled = true
+  home = false
+  posts = true
+EOF
+      ;;
+    off)
+      cat >> "$site_dir/hugo.toml" <<'EOF'
+
+[params.copyMarkdown]
+  enabled = false
+EOF
+      ;;
+    *)
+      echo "unsupported copy Markdown fixture mode: $copy_markdown_mode" >&2
+      return 1
+      ;;
+  esac
+
+  cat > "$site_dir/content/_index.md" <<EOF
 +++
 title = "Home *Post*"
 subtitle = "Fixture subtitle"
 description = "Fixture homepage description"
-homePageIsPost = true
+homePageIsPost = $home_page_is_post
 date = 2025-02-24T00:00:00Z
 author = "Fixture Author"
 +++

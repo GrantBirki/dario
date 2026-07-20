@@ -477,6 +477,58 @@ center {
   line-height: 1.4;
 }
 
+.page-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75em;
+  margin-block-start: 2em;
+}
+
+.page-meta .author-date {
+  margin-block: 0;
+}
+
+.page-meta-home {
+  margin-block-start: 1em;
+}
+
+.copy-markdown-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-block-size: 2.25em;
+  padding: 0.35em 0.65em;
+  color: var(--muted-text-color);
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5em;
+  font: inherit;
+  font-size: 0.8em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.copy-markdown-button:hover {
+  color: var(--text-color);
+  background-color: var(--footnote-bg-color);
+}
+
+.copy-markdown-button:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+}
+
+.copy-markdown-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.copy-markdown-icon {
+  flex: none;
+  fill: currentColor;
+}
+
 .mobile-toc-link,
 .toc-container h2 {
   font-size: 1.2em;
