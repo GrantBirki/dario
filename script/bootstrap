@@ -44,14 +44,20 @@ verify_vendored_hugo_packages() {
 }
 
 install_vendored_hugo_linux() {
-  require_cmd dpkg
+  require_cmd dpkg-deb
 
   local version="$1"
   local deb_pkg="$HUGO_VENDOR_BIN_DIR/hugo_extended_${version}_linux-amd64.deb"
   [[ -f "$deb_pkg" ]] || die "missing vendored Hugo package: $deb_pkg"
 
   echo -e "${BLUE}Installing vendored Hugo package:${OFF} ${PURPLE}${deb_pkg}${OFF}"
-  as_root dpkg -i "$deb_pkg"
+  local install_root="${RUNNER_TEMP:-$TMP_DIR}/hugo-${version}"
+  mkdir -p "$install_root"
+  dpkg-deb --extract "$deb_pkg" "$install_root"
+  export PATH="$install_root/usr/local/bin:$PATH"
+  if [[ -n "${GITHUB_PATH:-}" ]]; then
+    printf '%s\n' "$install_root/usr/local/bin" >> "$GITHUB_PATH"
+  fi
 }
 
 install_vendored_hugo_macos() {
