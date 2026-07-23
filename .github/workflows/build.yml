@@ -16,10 +16,15 @@ jobs:
     name: build
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-24.04, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
+      - if: matrix.os == 'ubuntu-24.04'
+        uses: openai/fence@db291f5c51949e6e6ec1634621b36dc4bbf3d54a # pin@v0.8.7
+        with:
+          mode: audit
+
       - name: checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v6.0.2
 
