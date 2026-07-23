@@ -16,11 +16,11 @@ jobs:
     name: lint
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
-      - if: matrix.os == 'ubuntu-24.04'
+      - if: matrix.os == 'ubuntu-latest'
         uses: openai/fence@db291f5c51949e6e6ec1634621b36dc4bbf3d54a # pin@v0.8.7
 
       - name: checkout
