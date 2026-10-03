@@ -11,6 +11,8 @@ on:
 permissions:
   contents: read
 
+cache-mode: none
+
 jobs:
   build:
     name: build
